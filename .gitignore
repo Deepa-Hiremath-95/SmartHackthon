@@ -26,6 +26,10 @@ node_modules/
 dist/
 build/
 .vite/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
 
 # ML / YOLO generated files
 ml/
