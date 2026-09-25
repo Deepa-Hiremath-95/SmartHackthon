@@ -36,6 +36,13 @@ export const api = {
     return handleResponse<Joint[]>(res);
   },
 
+  getJointHistory: async (jointId: string, limit: number = 100): Promise<import('../types/telemetry').JointHistoryItem[]> => {
+    const url = new URL(`/api/v1/joints/${encodeURIComponent(jointId)}/history`, window.location.origin);
+    url.searchParams.set('limit', limit.toString());
+    const res = await fetch(url.pathname + url.search);
+    return handleResponse<import('../types/telemetry').JointHistoryItem[]>(res);
+  },
+
   getPassEvents: async (jointId?: string, limit: number = 50): Promise<PassEvent[]> => {
     const url = new URL('/api/v1/pass-events', window.location.origin);
     if (jointId) url.searchParams.set('joint_id', jointId);

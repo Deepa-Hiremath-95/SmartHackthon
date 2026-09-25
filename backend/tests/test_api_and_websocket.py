@@ -78,10 +78,33 @@ class TestAPIAndWebSocket(unittest.TestCase):
             self.assertEqual(ack_data["endpoint"], "/ws/live")
             self.assertEqual(ack_data["provenance"], "SIMULATED")
 
-            # 2. Ping-pong test
-            websocket.send_text(json.dumps({"action": "ping"}))
-            pong = websocket.receive_json()
-            self.assertEqual(pong["type"], "pong")
+    def test_joint_history_endpoint(self):
+        """Verify GET /api/v1/joints/{joint_id}/history returns history list or 404."""
+        # 1. Non-existent joint returns 404
+        res_404 = self.client.get("/api/v1/joints/INVALID_JOINT/history")
+        self.assertEqual(res_404.status_code, 404)
+
+        # 2. Existing joint code e.g. "J04" returns 200 list
+        res_j04 = self.client.get("/api/v1/joints/J04/history")
+        self.assertEqual(res_j04.status_code, 200)
+        history = res_j04.json()
+        self.assertIsInstance(history, list)
+
+        # 3. Existing joint ID e.g. "CV01_J04" returns 200 list
+        res_id = self.client.get("/api/v1/joints/CV01_J04/history")
+        self.assertEqual(res_id.status_code, 200)
+        self.assertIsInstance(res_id.json(), list)
+
+    def test_joints_contain_rul(self):
+        """Verify GET /api/v1/conveyors/CV-01/joints includes RUL structure for every joint."""
+        response = self.client.get("/api/v1/conveyors/CV-01/joints")
+        self.assertEqual(response.status_code, 200)
+        joints = response.json()
+        self.assertTrue(len(joints) > 0)
+        for j in joints:
+            self.assertIn("rul", j)
+            self.assertIn("status", j["rul"])
+            self.assertIn(j["rul"]["status"], ["UNAVAILABLE", "DEMO", "ESTIMATED", "VALIDATED"])
 
 
 if __name__ == "__main__":

@@ -38,7 +38,6 @@ export function useLiveData() {
         api.getPassEvents(undefined, 25).catch(() => []),
       ]);
 
-      if (simStatus) {
         dispatch({
           type: 'INIT_REST_DATA',
           payload: {
@@ -46,11 +45,25 @@ export function useLiveData() {
             conveyors,
             joints,
             alerts,
-            simStatus,
+            simStatus: simStatus || {
+              run_id: 'init_run',
+              lap: 0,
+              current_lap: 0,
+              speed_preset: '600x',
+              paused: false,
+              scenario_phase: 'HEALTHY',
+              running: true,
+              conveyor_id: conveyorId,
+              time_acceleration: 600,
+              belt_position_m: 0,
+              target_joint: 'J04',
+              critical_laps_held: 0,
+              provenance: 'SIMULATED',
+            },
             passEvents,
+            conveyorId,
           },
         });
-      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to backfill data from REST API';
       dispatch({ type: 'SET_ERROR', payload: msg });
@@ -216,6 +229,20 @@ export function useLiveData() {
     dispatch({ type: 'SET_DEV_MODE', payload: enabled });
   }, []);
 
+  const loadJointHistory = useCallback(async (jointCode: string) => {
+    try {
+      const history = await api.getJointHistory(jointCode);
+      dispatch({
+        type: 'SET_JOINT_HISTORY',
+        payload: { jointCode, history },
+      });
+      return history;
+    } catch (e) {
+      console.warn(`Failed to load history for joint ${jointCode}:`, e);
+      return [];
+    }
+  }, []);
+
   const runDemo = useCallback(async () => {
     await api.runDemo();
     await refetchSimStatus();
@@ -225,6 +252,7 @@ export function useLiveData() {
   return {
     state,
     setSelectedConveyor,
+    loadJointHistory,
     refetchAlerts,
     refetchSimStatus,
     dismissScenarioEvent,

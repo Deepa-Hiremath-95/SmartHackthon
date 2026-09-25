@@ -155,6 +155,39 @@ export interface SimStatus {
   provenance: Provenance;
 }
 
+export interface JointHistoryItem {
+  pass_event_id: string;
+  joint_id: string;
+  lap: number;
+  health: number;
+  h_pass?: number;
+  risk_score?: number;
+  state: HealthState;
+  confidence?: number;
+  contributors?: Record<string, ModalityContributor>;
+  rul?: RULPayload;
+  timestamp: string;
+  provenance: Provenance;
+}
+
+export type ActivityEventType = 'STATE_CHANGE' | 'SCENARIO_EVENT' | 'ALERT_TRIGGERED';
+
+export interface ActivityLogEntry {
+  id: string;
+  type: ActivityEventType;
+  timestamp: string;
+  jointCode?: string;
+  title: string;
+  description?: string;
+  severity?: Severity;
+  state?: HealthState;
+  fromState?: HealthState;
+  toState?: HealthState;
+  health?: number;
+  lap?: number;
+  provenance: Provenance;
+}
+
 export interface RootInfo {
   platform: string;
   environment: string;
@@ -165,3 +198,4 @@ export interface RootInfo {
 }
 
 export type ConnectionState = 'Connected' | 'Degraded' | 'Offline';
+

@@ -48,7 +48,7 @@ interface NavItem {
 export const SECTIONS: NavItem[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard, isP0: true },
   { id: 'live_monitoring', label: 'Live Monitoring', icon: Radio, isP0: false },
-  { id: 'digital_twin', label: 'Digital Twin', icon: Layers, isP0: false },
+  { id: 'digital_twin', label: 'Digital Twin', icon: Layers, isP0: true },
   { id: 'joint_health', label: 'Joint Health', icon: HeartPulse, isP0: false },
   { id: 'ai_prediction', label: 'AI Prediction', icon: Sparkles, isP0: false },
   { id: 'alerts', label: 'Alert Center', icon: AlertOctagon, isP0: false },

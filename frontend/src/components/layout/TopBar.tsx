@@ -5,6 +5,7 @@ import {
   Maximize2,
   Minimize2,
   Code2,
+  AlertTriangle,
 } from 'lucide-react';
 import { Conveyor, ConnectionState } from '../../types/telemetry';
 
@@ -69,7 +70,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   return (
     <header className="h-14 bg-control-panel border-b border-control-border px-4 flex items-center justify-between gap-3 select-none">
       {/* Left: Brand & Conveyor / Mine Selector */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded bg-slate-800 border border-control-border flex items-center justify-center font-bold text-sm tracking-wider text-slate-100">
             <Activity className="w-4 h-4 text-emerald-400" />
@@ -80,7 +81,16 @@ export const TopBar: React.FC<TopBarProps> = ({
           </div>
         </div>
 
-        <div className="h-6 w-px bg-control-border mx-1" />
+        {/* Persistent SIMULATED / DEMO DATA Badge (Requirement 4) */}
+        <div
+          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-950/70 border border-purple-500/50 text-[11px] font-mono text-purple-200 shadow-sm"
+          title="Telemetry is SIMULATED. RUL is DEMO status. Never present as live sensor data."
+        >
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+          <span className="font-bold tracking-wider text-purple-300">SIMULATED / DEMO DATA</span>
+        </div>
+
+        <div className="h-6 w-px bg-control-border mx-1 hidden sm:block" />
 
         {/* Conveyor Selector */}
         <div className="flex items-center gap-2">

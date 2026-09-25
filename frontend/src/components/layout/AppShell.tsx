@@ -6,6 +6,7 @@ import { ScenarioEventBanner } from './ScenarioEventBanner';
 import { DemoControls } from '../sim/DemoControls';
 import { Footer } from './Footer';
 import { OverviewPage } from '../../pages/OverviewPage';
+import { DigitalTwinPage } from '../../pages/DigitalTwinPage';
 import { ComingSoonPage } from '../../pages/ComingSoonPage';
 import { useLiveData } from '../../hooks/useLiveData';
 
@@ -13,6 +14,7 @@ export const AppShell: React.FC = () => {
   const {
     state,
     setSelectedConveyor,
+    loadJointHistory,
     refetchSimStatus,
     dismissScenarioEvent,
     setDevMode,
@@ -65,6 +67,13 @@ export const AppShell: React.FC = () => {
         <main className="flex-1 flex flex-col overflow-y-auto bg-control-bg">
           {activeSection === 'overview' ? (
             <OverviewPage
+              state={state}
+              onSelectConveyor={setSelectedConveyor}
+              onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+              onLoadHistory={loadJointHistory}
+            />
+          ) : activeSection === 'digital_twin' ? (
+            <DigitalTwinPage
               state={state}
               onNavigateToSection={(section) => setActiveSection(section as SectionId)}
             />

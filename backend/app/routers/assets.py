@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
-from backend.app.models.entities import Conveyor, Joint, PassEvent, Alert, HealthSnapshot
-from backend.app.models.enums import AlertState, Provenance
+from backend.app.models.entities import Conveyor, Joint, PassEvent, Alert, HealthSnapshot, Prediction
+from backend.app.models.enums import AlertState, Provenance, RULStatus
 
 router = APIRouter(prefix="/api/v1", tags=["Assets & Telemetry"])
 
@@ -70,6 +70,18 @@ def list_conveyor_joints(conveyor_id: str, db: Session = Depends(get_db)):
             .order_by(HealthSnapshot.created_at.desc())
             .first()
         )
+        latest_pred = (
+            db.query(Prediction)
+            .filter(Prediction.joint_id == j.id)
+            .order_by(Prediction.created_at.desc())
+            .first()
+        )
+        rul_dict = {
+            "status": latest_pred.rul_status.value if latest_pred else RULStatus.UNAVAILABLE.value,
+            "reason": "no_degradation_trend" if (latest_pred and latest_pred.rul_status == RULStatus.UNAVAILABLE) else ("no_degradation_trend" if not latest_pred else None),
+            "low_days": latest_pred.rul_low_days if latest_pred else None,
+            "high_days": latest_pred.rul_high_days if latest_pred else None,
+        }
         results.append({
             "id": j.id,
             "joint_code": j.joint_code,
@@ -79,7 +91,54 @@ def list_conveyor_joints(conveyor_id: str, db: Session = Depends(get_db)):
             "health": latest_snap.h_joint if latest_snap else 100.0,
             "state": latest_snap.state.value if latest_snap else "HEALTHY",
             "risk_score": latest_snap.risk_score if latest_snap else 0.0,
+            "rul": rul_dict,
             "provenance": Provenance.SIMULATED.value,
+        })
+    return results
+
+
+@router.get("/joints/{joint_id}/history")
+def get_joint_history(
+    joint_id: str,
+    limit: int = Query(100, le=500),
+    db: Session = Depends(get_db),
+):
+    """Returns historical pass events and health snapshots for a specific joint."""
+    joint = db.query(Joint).filter((Joint.id == joint_id) | (Joint.joint_code == joint_id)).first()
+    if not joint:
+        raise HTTPException(status_code=404, detail=f"Joint {joint_id} not found")
+
+    snapshots = (
+        db.query(HealthSnapshot, PassEvent, Prediction)
+        .join(PassEvent, HealthSnapshot.pass_event_id == PassEvent.id)
+        .outerjoin(Prediction, HealthSnapshot.pass_event_id == Prediction.pass_event_id)
+        .filter(HealthSnapshot.joint_id == joint.id)
+        .order_by(PassEvent.t_enter.desc())
+        .limit(limit)
+        .all()
+    )
+
+    results = []
+    for snap, pe, pred in reversed(snapshots):
+        rul_dict = {
+            "status": pred.rul_status.value if pred else RULStatus.UNAVAILABLE.value,
+            "reason": "no_degradation_trend" if (pred and pred.rul_status == RULStatus.UNAVAILABLE) else None,
+            "low_days": pred.rul_low_days if pred else None,
+            "high_days": pred.rul_high_days if pred else None,
+        }
+        results.append({
+            "pass_event_id": pe.id,
+            "joint_id": joint.joint_code,
+            "lap": pe.lap_no,
+            "health": snap.h_joint,
+            "h_pass": snap.h_pass,
+            "risk_score": snap.risk_score,
+            "state": snap.state.value,
+            "confidence": snap.confidence,
+            "contributors": snap.contributors_json,
+            "rul": rul_dict,
+            "timestamp": pe.t_enter.isoformat() + "Z",
+            "provenance": pe.provenance.value,
         })
     return results
 

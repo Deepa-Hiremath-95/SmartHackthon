@@ -249,8 +249,9 @@ export const RULBadge: React.FC<{
   lowDays?: number | null;
   highDays?: number | null;
   reason?: string | null;
+  showDetails?: boolean;
   className?: string;
-}> = ({ status, lowDays, highDays, reason, className = '' }) => {
+}> = ({ status, lowDays, highDays, reason, showDetails = false, className = '' }) => {
   const st = (status || 'UNAVAILABLE').toUpperCase();
 
   let badgeColor = 'bg-slate-800 text-slate-400 border-slate-700';
@@ -258,33 +259,60 @@ export const RULBadge: React.FC<{
 
   switch (st) {
     case 'DEMO':
-      badgeColor = 'bg-purple-950/50 text-purple-300 border-purple-500/40';
+      badgeColor = 'bg-purple-950/60 text-purple-300 border-purple-500/50 font-semibold';
       label = 'DEMO';
       break;
     case 'ESTIMATED':
-      badgeColor = 'bg-cyan-950/50 text-cyan-300 border-cyan-500/40';
+      badgeColor = 'bg-cyan-950/60 text-cyan-300 border-cyan-500/50 font-semibold';
       label = 'ESTIMATED';
       break;
     case 'VALIDATED':
-      badgeColor = 'bg-emerald-950/50 text-emerald-300 border-emerald-500/40';
+      badgeColor = 'bg-emerald-950/60 text-emerald-300 border-emerald-500/50 font-semibold';
       label = 'VALIDATED';
       break;
     case 'UNAVAILABLE':
     default:
-      badgeColor = 'bg-slate-900/60 text-slate-400 border-slate-700/40';
+      badgeColor = 'bg-slate-900/70 text-slate-400 border-slate-700/50';
       label = 'UNAVAILABLE';
       break;
   }
 
   const hasDays = lowDays !== undefined && lowDays !== null && highDays !== undefined && highDays !== null;
-  const daysText = hasDays ? `${Math.round(lowDays)}–${Math.round(highDays)} days` : reason || 'Insufficient history';
+  
+  let displayText = '';
+  if (st === 'DEMO' || st === 'ESTIMATED' || st === 'VALIDATED') {
+    if (hasDays) {
+      const low = typeof lowDays === 'number' ? lowDays.toFixed(1) : lowDays;
+      const high = typeof highDays === 'number' ? highDays.toFixed(1) : highDays;
+      displayText = `${low} – ${high} days to threshold`;
+    } else {
+      displayText = 'Estimating degradation rate...';
+    }
+  } else {
+    if (reason === 'no_degradation_trend') {
+      displayText = 'no_degradation_trend (healthy)';
+    } else if (reason === 'insufficient_history') {
+      displayText = 'insufficient_history (<5 passes)';
+    } else if (reason) {
+      displayText = reason;
+    } else {
+      displayText = 'no_degradation_trend';
+    }
+  }
 
   return (
-    <div className={`inline-flex items-center gap-2 ${className}`}>
-      <span className={`px-2 py-0.5 rounded text-[11px] font-mono tracking-wider border ${badgeColor}`}>
+    <div className={`inline-flex flex-wrap items-center gap-2 ${className}`}>
+      <span className={`px-2 py-0.5 rounded text-[11px] font-mono tracking-wider border shadow-sm ${badgeColor}`}>
         {label}
       </span>
-      <span className="text-xs text-control-muted font-mono">{daysText}</span>
+      <span className="text-xs text-slate-300 font-mono font-medium">
+        {displayText}
+      </span>
+      {showDetails && st === 'DEMO' && (
+        <span className="text-[10px] text-purple-300/80 font-mono block w-full mt-0.5">
+          Linear regression slope on smoothed EWMA health
+        </span>
+      )}
     </div>
   );
 };

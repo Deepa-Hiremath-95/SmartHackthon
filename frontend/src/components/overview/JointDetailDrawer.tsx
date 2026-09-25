@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   ExternalLink,
@@ -8,10 +8,14 @@ import {
   Layers,
   Clock,
   AlertOctagon,
+  TrendingDown,
+  ShieldCheck,
+  Radio,
 } from 'lucide-react';
 import { Joint, Alert, PassEvent } from '../../types/telemetry';
 import { classifyHealth, SeverityBadge, RULBadge } from '../../utils/severity';
 import { JointHistoryPoint } from '../../hooks/liveDataReducer';
+import { api } from '../../services/api';
 import {
   ResponsiveContainer,
   LineChart,
@@ -20,6 +24,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  ReferenceLine,
 } from 'recharts';
 
 interface JointDetailDrawerProps {
@@ -30,6 +35,7 @@ interface JointDetailDrawerProps {
   latestPass: PassEvent | null;
   onClose: () => void;
   onNavigateToSection?: (section: string) => void;
+  onLoadHistory?: (code: string) => Promise<unknown>;
 }
 
 export const JointDetailDrawer: React.FC<JointDetailDrawerProps> = ({
@@ -40,19 +46,76 @@ export const JointDetailDrawer: React.FC<JointDetailDrawerProps> = ({
   latestPass,
   onClose,
   onNavigateToSection,
+  onLoadHistory,
 }) => {
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [localHistory, setLocalHistory] = useState<JointHistoryPoint[]>([]);
+
+  // Fetch SQLite history on drawer open
+  useEffect(() => {
+    if (!jointCode) return;
+
+    let mounted = true;
+    setLoadingHistory(true);
+
+    const fetchHistory = async () => {
+      try {
+        if (onLoadHistory) {
+          await onLoadHistory(jointCode);
+        } else {
+          const res = await api.getJointHistory(jointCode);
+          if (mounted && res && res.length > 0) {
+            setLocalHistory(
+              res.map((p) => ({
+                lap: p.lap,
+                health: Math.round(p.health * 10) / 10,
+                timestamp: p.timestamp,
+              }))
+            );
+          }
+        }
+      } catch (err) {
+        console.warn(`Failed to backfill history for joint ${jointCode}:`, err);
+      } finally {
+        if (mounted) setLoadingHistory(false);
+      }
+    };
+
+    fetchHistory();
+
+    return () => {
+      mounted = false;
+    };
+  }, [jointCode, onLoadHistory]);
+
   if (!jointCode || !joint) return null;
 
   const health = joint.health;
   const config = classifyHealth(health);
-  const jointAlerts = alerts.filter((a) => a.joint_id === joint.id || a.joint_id === jointCode || a.joint_id.endsWith(jointCode));
+  const jointAlerts = alerts.filter(
+    (a) =>
+      a.joint_id === joint.id ||
+      a.joint_id === jointCode ||
+      a.joint_id.endsWith(jointCode)
+  );
 
-  // Chart data from memory points only
-  const chartData = historyPoints.map((p) => ({
+  // Combine passed history points or fallback to local history
+  const activeHistory = historyPoints.length > 0 ? historyPoints : localHistory;
+
+  const chartData = activeHistory.map((p) => ({
     lap: `Lap ${p.lap}`,
+    lapNum: p.lap,
     health: p.health,
     time: new Date(p.timestamp).toLocaleTimeString(),
   }));
+
+  // Determine degradation rate from first to last point if >= 2 points
+  let healthDelta = 0;
+  if (chartData.length >= 2) {
+    const firstH = chartData[0].health;
+    const lastH = chartData[chartData.length - 1].health;
+    healthDelta = Math.round((lastH - firstH) * 10) / 10;
+  }
 
   return (
     <div
@@ -62,22 +125,25 @@ export const JointDetailDrawer: React.FC<JointDetailDrawerProps> = ({
       className="fixed inset-y-0 right-0 w-full max-w-md bg-control-panel border-l border-control-border shadow-2xl z-40 flex flex-col transition-transform animate-slide-in select-none"
     >
       {/* Header */}
-      <div className="p-4 border-b border-control-border flex items-center justify-between bg-control-bg/60">
+      <div className="p-4 border-b border-control-border flex items-center justify-between bg-control-bg/70">
         <div>
           <div className="flex items-center gap-2">
             <h2 id="joint-drawer-title" className="text-lg font-bold font-mono text-white">
               Joint {joint.joint_code}
             </h2>
             <SeverityBadge health={health} size="sm" />
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
+              {joint.id}
+            </span>
           </div>
           <p className="text-xs text-control-dim font-mono mt-0.5">
-            Belt Loop Odometry: {joint.position_m} m • {joint.splice_type}
+            Belt Odometry: {joint.position_m} m • {joint.splice_type}
           </p>
         </div>
 
         <button
           onClick={onClose}
-          className="p-1.5 rounded text-control-dim hover:text-white hover:bg-control-subpanel transition-colors"
+          className="p-1.5 rounded text-control-dim hover:text-white hover:bg-control-subpanel transition-colors cursor-pointer"
           title="Close drawer (Esc)"
           aria-label="Close drawer"
         >
@@ -90,15 +156,20 @@ export const JointDetailDrawer: React.FC<JointDetailDrawerProps> = ({
         {/* Health & Risk Metrics Card */}
         <div className="bg-control-subpanel border border-control-border rounded-lg p-3.5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-200">Joint Health Score</span>
-            <span className={`text-2xl font-bold font-mono ${config.textClass}`}>
-              {health.toFixed(1)}%
-            </span>
+            <div className="space-y-0.5">
+              <span className="font-semibold text-slate-200 block text-xs">Joint Health Score (EWMA)</span>
+              <span className="text-[10px] text-control-dim font-mono">Fused multimodal health index</span>
+            </div>
+            <div className="text-right">
+              <span className={`text-2xl font-bold font-mono ${config.textClass}`}>
+                {health.toFixed(1)}%
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-[11px] font-mono border-t border-control-border pt-2 text-control-muted">
             <div>
-              <span className="block text-control-dim">Fused Risk:</span>
+              <span className="block text-control-dim">Fused Risk Score:</span>
               <span className="font-bold text-slate-200">
                 {(joint.risk_score ?? (1 - health / 100)).toFixed(2)}
               </span>
@@ -108,75 +179,129 @@ export const JointDetailDrawer: React.FC<JointDetailDrawerProps> = ({
               <span className="text-slate-200">
                 {joint.last_pass_time
                   ? new Date(joint.last_pass_time).toLocaleTimeString()
-                  : 'Live session'}
+                  : 'Live Station ST-01'}
               </span>
             </div>
           </div>
         </div>
 
         {/* Prognostics: RUL Card (Non-negotiable PRD Rule) */}
-        <div className="bg-control-subpanel border border-control-border rounded-lg p-3.5 space-y-2">
+        <div className="bg-control-subpanel border border-control-border rounded-lg p-3.5 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-control-dim" />
+              <Clock className="w-3.5 h-3.5 text-cyan-400" />
               Remaining Useful Life (RUL)
             </span>
+            <span className="text-[10px] font-mono text-control-dim">PRD 6.6 Prognostics</span>
           </div>
-          <RULBadge
-            status={joint.rul?.status || (health < 70 ? 'DEMO' : 'UNAVAILABLE')}
-            lowDays={joint.rul?.low_days}
-            highDays={joint.rul?.high_days}
-            reason={joint.rul?.reason}
-          />
-          <p className="text-[10px] text-control-dim italic">
-            * RUL estimates strictly indicate model validation credibility (UNAVAILABLE / DEMO / ESTIMATED / VALIDATED).
-          </p>
+
+          <div className="p-2.5 bg-control-bg/60 rounded border border-control-border space-y-1.5">
+            <RULBadge
+              status={joint.rul?.status || (health < 80 ? 'DEMO' : 'UNAVAILABLE')}
+              lowDays={joint.rul?.low_days}
+              highDays={joint.rul?.high_days}
+              reason={joint.rul?.reason || (health >= 80 ? 'no_degradation_trend' : null)}
+              showDetails={true}
+            />
+          </div>
+
+          <div className="text-[10px] text-control-dim leading-relaxed space-y-1 font-mono">
+            {joint.rul?.status === 'DEMO' ? (
+              <p className="text-purple-300/90 flex items-center gap-1">
+                <TrendingDown className="w-3 h-3 text-purple-400 shrink-0" />
+                <span>Degradation trend active. Estimated time to critical threshold (Health ≤ 50%).</span>
+              </p>
+            ) : (
+              <p className="text-slate-400 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span>Status UNAVAILABLE: No active degradation trend detected; joint health is stable within baseline.</span>
+              </p>
+            )}
+            <p className="text-slate-500 italic text-[9px]">
+              * RUL numbers are always displayed with their model credibility status (UNAVAILABLE / DEMO / ESTIMATED / VALIDATED).
+            </p>
+          </div>
         </div>
 
-        {/* Live Health-over-Time Chart (WebSocket Memory History Only) */}
+        {/* Health-over-Time Chart (Backed by REST history + live WebSocket updates) */}
         <div className="bg-control-subpanel border border-control-border rounded-lg p-3.5 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
-              Live Health History ({chartData.length} passes)
-            </span>
-            <span className="text-[10px] font-mono text-control-dim">Real WS points</span>
+              <span className="font-semibold text-slate-200">
+                Health History ({chartData.length} passes)
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono">
+                <Radio className="w-2.5 h-2.5 animate-pulse" />
+                Live WS
+              </span>
+            </div>
           </div>
 
           {chartData.length === 0 ? (
-            <div className="h-32 flex flex-col items-center justify-center text-control-dim text-center p-3 border border-dashed border-control-border rounded">
+            <div className="h-36 flex flex-col items-center justify-center text-control-dim text-center p-3 border border-dashed border-control-border rounded">
               <Activity className="w-5 h-5 mb-1 text-slate-600 animate-pulse" />
-              <span>Awaiting live pass updates...</span>
+              <span>{loadingHistory ? 'Loading history from database...' : 'Awaiting pass updates...'}</span>
               <span className="text-[10px] text-slate-600">
-                Points record as joint passes station ST-01
+                Data records automatically as joint crosses Station ST-01
               </span>
             </div>
           ) : (
-            <div className="h-36 w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#273447" vertical={false} />
-                  <XAxis dataKey="lap" stroke="#64748b" tick={{ fontSize: 9 }} />
-                  <YAxis domain={[0, 100]} stroke="#64748b" tick={{ fontSize: 9 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#131b26',
-                      borderColor: '#273447',
-                      fontSize: '11px',
-                      fontFamily: 'monospace',
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="health"
-                    stroke={health < 50 ? '#ef4444' : health < 70 ? '#f97316' : health < 85 ? '#f59e0b' : '#10b981'}
-                    strokeWidth={2}
-                    dot={{ r: 2 }}
-                    activeDot={{ r: 4 }}
-                    isAnimationActive={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div>
+              <div className="h-40 w-full pt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 8, right: 10, left: -25, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#273447" vertical={false} />
+                    <XAxis dataKey="lap" stroke="#64748b" tick={{ fontSize: 9 }} />
+                    <YAxis domain={[0, 100]} stroke="#64748b" tick={{ fontSize: 9 }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#131b26',
+                        borderColor: '#273447',
+                        fontSize: '11px',
+                        fontFamily: 'monospace',
+                        borderRadius: '6px',
+                        padding: '6px 10px',
+                      }}
+                      formatter={(val: unknown) => {
+                        const num = typeof val === 'number' ? val : Number(val);
+                        return [`${num.toFixed(1)}%`, 'Health Score'];
+                      }}
+                    />
+                    {/* Severity Threshold Reference Lines */}
+                    <ReferenceLine y={85} stroke="#f59e0b" strokeDasharray="2 2" strokeOpacity={0.6} />
+                    <ReferenceLine y={70} stroke="#f97316" strokeDasharray="2 2" strokeOpacity={0.6} />
+                    <ReferenceLine y={50} stroke="#ef4444" strokeDasharray="2 2" strokeOpacity={0.7} />
+                    <Line
+                      type="monotone"
+                      dataKey="health"
+                      stroke={health < 50 ? '#ef4444' : health < 70 ? '#f97316' : health < 85 ? '#f59e0b' : '#10b981'}
+                      strokeWidth={2.5}
+                      dot={{ r: 2.5, fill: health < 50 ? '#ef4444' : '#10b981' }}
+                      activeDot={{ r: 5 }}
+                      isAnimationActive={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] font-mono text-control-dim pt-2 border-t border-control-border">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Watch: 85%
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Crit: 50%
+                  </span>
+                </div>
+                {chartData.length >= 2 && (
+                  <span className={healthDelta < 0 ? 'text-red-400 font-bold' : 'text-emerald-400'}>
+                    Trend: {healthDelta > 0 ? `+${healthDelta}` : healthDelta}%
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -252,7 +377,7 @@ export const JointDetailDrawer: React.FC<JointDetailDrawerProps> = ({
         )}
       </div>
 
-      {/* Footer Actions (Progressive disclosure links) */}
+      {/* Footer Actions */}
       <div className="p-3 border-t border-control-border bg-control-bg/80 flex items-center justify-between gap-2">
         <button
           onClick={() => onNavigateToSection?.('inspection')}

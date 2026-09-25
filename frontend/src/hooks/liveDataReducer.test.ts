@@ -151,4 +151,218 @@ describe('liveDataReducer tests', () => {
     expect(freshState.secondsSinceLastMessage).toBe(2);
     expect(freshState.isStale).toBe(false);
   });
+
+  it('isolates conveyor state when switching between CV-01 and CV-02', () => {
+    // 1. Init CV-01
+    let state = liveDataReducer(INITIAL_STATE, {
+      type: 'INIT_REST_DATA',
+      payload: {
+        rootInfo: mockRootInfo,
+        conveyors: [mockConveyor],
+        joints: mockJoints,
+        alerts: [],
+        simStatus: mockSimStatus,
+        conveyorId: 'CV-01',
+      },
+    });
+
+    expect(state.selectedConveyorId).toBe('CV-01');
+    expect(state.jointOrder).toEqual(['J01', 'J02']);
+
+    // 2. Switch to CV-02 and init CV-02 joints
+    state = liveDataReducer(state, {
+      type: 'SET_SELECTED_CONVEYOR',
+      payload: 'CV-02',
+    });
+
+    const mockCv2Joints: Joint[] = [
+      {
+        id: 'CV02_J25',
+        joint_code: 'J25',
+        belt_id: 'BELT-02',
+        position_m: 0,
+        splice_type: 'Overlap Step Splice',
+        health: 98.0,
+        state: 'HEALTHY',
+        risk_score: 0.02,
+        provenance: 'SIMULATED',
+      },
+    ];
+
+    state = liveDataReducer(state, {
+      type: 'INIT_REST_DATA',
+      payload: {
+        rootInfo: mockRootInfo,
+        conveyors: [mockConveyor],
+        joints: mockCv2Joints,
+        alerts: [],
+        simStatus: mockSimStatus,
+        conveyorId: 'CV-02',
+      },
+    });
+
+    expect(state.selectedConveyorId).toBe('CV-02');
+    expect(state.joints['J25']).toBeDefined();
+    expect(state.jointOrder).toEqual(['J25']);
+
+    // 3. Receive CV-01 live health update while on CV-02
+    state = liveDataReducer(state, {
+      type: 'WS_HEALTH_UPDATE',
+      payload: {
+        type: 'health_update',
+        ts: '2026-09-22T02:00:00Z',
+        conveyor_id: 'CV-01',
+        joint_id: 'J01',
+        pass_event_id: 'pe_test_cv1',
+        lap_no: 3,
+        health: 88.0,
+        state: 'HEALTHY',
+        confidence: 0.9,
+        risk: 0.12,
+        rul: { status: 'UNAVAILABLE' },
+        contributors: {},
+        provenance: 'SIMULATED',
+      },
+    });
+
+    // Active screen (CV-02) should still show J25
+    expect(state.joints['J25']).toBeDefined();
+    expect(state.jointOrder).toEqual(['J25']);
+
+    // Background cache for CV-01 should have updated health
+    expect(state.conveyorData['CV-01'].joints['J01'].health).toBe(88.0);
+
+    // 4. Switch back to CV-01
+    state = liveDataReducer(state, {
+      type: 'SET_SELECTED_CONVEYOR',
+      payload: 'CV-01',
+    });
+    expect(state.selectedConveyorId).toBe('CV-01');
+    expect(state.joints['J01'].health).toBe(88.0);
+    expect(state.jointOrder).toEqual(['J01', 'J02']);
+  });
+
+  it('handles SET_JOINT_HISTORY and merges history points chronologically without duplicates', () => {
+    let state = liveDataReducer(INITIAL_STATE, {
+      type: 'SET_JOINT_HISTORY',
+      payload: {
+        jointCode: 'J04',
+        history: [
+          {
+            pass_event_id: 'pe_1',
+            joint_id: 'J04',
+            lap: 1,
+            health: 95.0,
+            state: 'HEALTHY',
+            timestamp: '2026-09-22T00:01:00Z',
+            provenance: 'SIMULATED',
+          },
+          {
+            pass_event_id: 'pe_2',
+            joint_id: 'J04',
+            lap: 2,
+            health: 91.0,
+            state: 'HEALTHY',
+            timestamp: '2026-09-22T00:02:00Z',
+            provenance: 'SIMULATED',
+          },
+        ],
+      },
+    });
+
+    expect(state.jointHistory['J04']).toHaveLength(2);
+    expect(state.jointHistory['J04'][0].health).toBe(95.0);
+    expect(state.jointHistory['J04'][1].health).toBe(91.0);
+
+    // Merge another set of points (with one overlap)
+    state = liveDataReducer(state, {
+      type: 'SET_JOINT_HISTORY',
+      payload: {
+        jointCode: 'J04',
+        history: [
+          {
+            pass_event_id: 'pe_2',
+            joint_id: 'J04',
+            lap: 2,
+            health: 91.0,
+            state: 'HEALTHY',
+            timestamp: '2026-09-22T00:02:00Z',
+            provenance: 'SIMULATED',
+          },
+          {
+            pass_event_id: 'pe_3',
+            joint_id: 'J04',
+            lap: 3,
+            health: 84.0,
+            state: 'WATCH',
+            timestamp: '2026-09-22T00:03:00Z',
+            provenance: 'SIMULATED',
+          },
+        ],
+      },
+    });
+
+    expect(state.jointHistory['J04']).toHaveLength(3);
+    expect(state.jointHistory['J04'][2].health).toBe(84.0);
+  });
+
+  it('records state transitions and scenario events into dashboard-wide activityLog', () => {
+    let state = liveDataReducer(INITIAL_STATE, {
+      type: 'INIT_REST_DATA',
+      payload: {
+        rootInfo: mockRootInfo,
+        conveyors: [mockConveyor],
+        joints: mockJoints,
+        alerts: [],
+        simStatus: mockSimStatus,
+      },
+    });
+
+    // J01 starts HEALTHY. Transition J01 to WATCH.
+    state = liveDataReducer(state, {
+      type: 'WS_HEALTH_UPDATE',
+      payload: {
+        type: 'health_update',
+        ts: '2026-09-22T01:35:00Z',
+        conveyor_id: 'CV-01',
+        joint_id: 'J01',
+        pass_event_id: 'pe_j1_watch',
+        lap_no: 4,
+        health: 82.0,
+        state: 'WATCH',
+        confidence: 0.92,
+        risk: 0.25,
+        rul: { status: 'DEMO', low_days: 6.0, high_days: 9.0 },
+        contributors: {},
+        provenance: 'SIMULATED',
+      },
+    });
+
+    expect(state.activityLog.length).toBeGreaterThanOrEqual(1);
+    const lastEvent = state.activityLog[0];
+    expect(lastEvent.type).toBe('STATE_CHANGE');
+    expect(lastEvent.jointCode).toBe('J01');
+    expect(lastEvent.fromState).toBe('HEALTHY');
+    expect(lastEvent.toState).toBe('WATCH');
+
+    // Trigger scenario milestone
+    state = liveDataReducer(state, {
+      type: 'WS_SCENARIO_EVENT',
+      payload: {
+        type: 'scenario_event',
+        ts: '2026-09-22T01:40:00Z',
+        run_id: 'run_test_123',
+        event: 'CRITICAL_HOLD_COMPLETED',
+        scenario: 'splice_degradation',
+        target_joint: 'J04',
+        critical_laps_held: 3,
+        action: 'RESETTING',
+        provenance: 'SIMULATED',
+      },
+    });
+
+    expect(state.activityLog[0].type).toBe('SCENARIO_EVENT');
+    expect(state.activityLog[0].title).toContain('CRITICAL_HOLD_COMPLETED');
+    expect(state.activityLog[0].jointCode).toBe('J04');
+  });
 });
