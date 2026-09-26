@@ -56,7 +56,7 @@ export function useLiveData() {
               conveyor_id: conveyorId,
               time_acceleration: 600,
               belt_position_m: 0,
-              target_joint: 'J04',
+              target_joint: 'J02',
               critical_laps_held: 0,
               provenance: 'SIMULATED',
             },

@@ -79,10 +79,10 @@ def seed_database(db: Session):
         },
     }
 
-    # Seed 24 joints on CV-01 (J01 to J24 spaced at 200m)
-    for i in range(1, 25):
+    # Seed 3 joints on CV-01 (J01, J02, J03 spaced at 1600m on 4800m loop)
+    for i in range(1, 4):
         code = f"J{i:02d}"
-        pos_m = (i - 1) * 200.0
+        pos_m = (i - 1) * 1600.0
         joint = Joint(
             id=f"CV01_{code}",
             belt_id="BELT-01",
@@ -97,20 +97,20 @@ def seed_database(db: Session):
     st1 = Station(
         id="ST-01",
         conveyor_id="CV-01",
-        name="Head Pulley Inspection Station",
+        name="Head Pulley & In-Line Inspection Station",
         position_m=0.0,
         status="OPERATIONAL",
     )
     db.add(st1)
 
-    # Sensors on ST-01
+    # Sensors on ST-01 / CV-01 (CAD Digital Twin Hardware Spec)
     sensors_cv1 = [
-        (Modality.VISION, "Basler ace 2 A2A1920-51gcBAS HD Camera", 30.0),
+        (Modality.VISION, "Multispectral Inspection Camera (RGB + NIR 30 FPS)", 30.0),
+        (Modality.LASER, "TF-Luna Micro LiDAR 3D Profile Scanner (850nm ToF)", 100.0),
+        (Modality.TENSION, "Precision Tension Load Cell (Dual Shear Beam)", 100.0),
+        (Modality.VIBRATION, "Inductive Proximity Sensor Array (Internal Rupture / Metallic Cord)", 1000.0),
         (Modality.THERMAL, "FLIR A50 Thermal Infrared Camera", 10.0),
-        (Modality.VIBRATION, "PCB Piezotronics 608A11 Triaxial Accelerometer", 10000.0),
-        (Modality.ACOUSTIC, "GRAS 46AE 1/2'' CCP Free-field Microphone", 44100.0),
-        (Modality.LASER, "Micro-Epsilon scanCONTROL 3000 Laser Scanner", 100.0),
-        (Modality.TENSION, "Flintec SB4 Precision Load Cell", 100.0),
+        (Modality.ACOUSTIC, "GRAS 46AE Free-field Acoustic Sensor", 44100.0),
         (Modality.SPEED, "Kubler Sendix 5000 Optical Shaft Encoder", 1000.0),
     ]
     for idx, (mod, model, rate) in enumerate(sensors_cv1, start=1):

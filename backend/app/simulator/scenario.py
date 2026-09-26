@@ -11,7 +11,7 @@ class SpliceDegradationScenario:
     Signals saturate at plausible maxima so fused health settles in the 20-35% range.
     """
 
-    def __init__(self, target_joint_code: str = "J04", seed: int = 42, max_degradation_laps: int = 26):
+    def __init__(self, target_joint_code: str = "J02", seed: int = 42, max_degradation_laps: int = 26):
         self.target_joint_code = target_joint_code
         self.seed = seed
         self.max_degradation_laps = max_degradation_laps

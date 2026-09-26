@@ -4,6 +4,7 @@ import {
   Minimize2,
   Crosshair,
   Camera,
+  Activity,
 } from 'lucide-react';
 import { Joint, SimStatus } from '../../types/telemetry';
 import { classifyHealth, SeverityShape } from '../../utils/severity';
@@ -25,11 +26,11 @@ export const InteractiveConveyorMap: React.FC<InteractiveConveyorMapProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // If jointOrder is empty, fallback to J01..J24
+  // If jointOrder is empty, fallback to J01..J03
   const displayCodes =
     jointOrder.length > 0
       ? jointOrder
-      : Array.from({ length: 24 }, (_, i) => `J${(i + 1).toString().padStart(2, '0')}`);
+      : ['J01', 'J02', 'J03'];
 
   const beltPosition = simStatus?.belt_position_m ?? 0;
   const loopLength = 4800; // meters
@@ -45,10 +46,10 @@ export const InteractiveConveyorMap: React.FC<InteractiveConveyorMapProps> = ({
         <div className="flex items-center gap-2">
           <Crosshair className="w-4 h-4 text-emerald-400" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-            Linear Conveyor Loop Schematic (OV-02)
+            Conveyor Loop Schematic & Sensor Topology (OV-02)
           </h2>
           <span className="text-[11px] font-mono text-control-dim bg-control-subpanel px-2 py-0.5 rounded border border-control-border">
-            4,800 m Loop • 24 Spliced Joints
+            4,800 m Loop • 3 Spliced Joints • 4 Sensor Systems
           </span>
         </div>
 
@@ -84,15 +85,25 @@ export const InteractiveConveyorMap: React.FC<InteractiveConveyorMapProps> = ({
       </div>
 
       {/* Track Container */}
-      <div className="relative py-6 px-4 bg-control-bg/80 border border-control-border/60 rounded-md overflow-x-auto">
-        {/* Inspection Station ST-01 Marker at 0m */}
-        <div className="absolute top-2 left-6 flex items-center gap-1 text-[10px] font-mono text-cyan-400 bg-cyan-950/50 px-2 py-0.5 rounded border border-cyan-500/40 z-10">
-          <Camera className="w-3 h-3" />
-          <span>ST-01 Station (0m Head Pulley)</span>
+      <div className="relative py-7 px-4 bg-control-bg/80 border border-control-border/60 rounded-md overflow-x-auto">
+        {/* Sensor Stations Overlay Bar */}
+        <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-3 px-2">
+          <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+            <Activity className="w-3 h-3" />
+            <span>TF-Luna LiDAR & Load Cell (Chute)</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded border border-blue-500/30">
+            <Activity className="w-3 h-3" />
+            <span>3x Inductive Rupture Stations</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/30">
+            <Camera className="w-3 h-3" />
+            <span>Multispectral Mast (Head Discharge)</span>
+          </div>
         </div>
 
         {/* Linear Conveyor Belt Graphic */}
-        <div className="relative min-w-[760px] h-24 flex items-center mt-3">
+        <div className="relative min-w-[640px] h-24 flex items-center mt-2 px-8">
           {/* Main Belt Line */}
           <div className="absolute left-0 right-0 h-3 bg-slate-800 rounded-full border border-slate-700 shadow-inner">
             {/* Belt Odometry Indicator */}

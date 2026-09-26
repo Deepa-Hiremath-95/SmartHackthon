@@ -43,18 +43,17 @@ class TestModelsAndSeeds(unittest.TestCase):
         self.assertIn("CV-02", cv_ids)
 
     def test_joints_seeded(self):
-        """Verify 24 joints on CV-01 and 6 joints on CV-02."""
+        """Verify 3 joints on CV-01 and 6 joints on CV-02."""
         cv1 = self.db.query(Conveyor).filter(Conveyor.id == "CV-01").first()
         cv1_joints = self.db.query(Joint).filter(Joint.belt_id == cv1.belts[0].id).all()
-        self.assertEqual(len(cv1_joints), 24)
+        self.assertEqual(len(cv1_joints), 3)
 
-        # Verify J01 to J24 codes exist and positions are 200m apart
+        # Verify J01 to J03 codes exist and positions are 1600m apart
         codes = [j.joint_code for j in cv1_joints]
-        self.assertEqual(codes[0], "J01")
-        self.assertEqual(codes[23], "J24")
+        self.assertEqual(codes, ["J01", "J02", "J03"])
         self.assertAlmostEqual(cv1_joints[0].position_m, 0.0)
-        self.assertAlmostEqual(cv1_joints[1].position_m, 200.0)
-        self.assertAlmostEqual(cv1_joints[23].position_m, 4600.0)
+        self.assertAlmostEqual(cv1_joints[1].position_m, 1600.0)
+        self.assertAlmostEqual(cv1_joints[2].position_m, 3200.0)
 
         # Baseline data present on all joints
         for j in cv1_joints:

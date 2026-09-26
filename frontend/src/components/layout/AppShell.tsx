@@ -6,8 +6,17 @@ import { ScenarioEventBanner } from './ScenarioEventBanner';
 import { DemoControls } from '../sim/DemoControls';
 import { Footer } from './Footer';
 import { OverviewPage } from '../../pages/OverviewPage';
+import { LiveMonitoringPage } from '../../pages/LiveMonitoringPage';
 import { DigitalTwinPage } from '../../pages/DigitalTwinPage';
-import { ComingSoonPage } from '../../pages/ComingSoonPage';
+import { JointHealthPage } from '../../pages/JointHealthPage';
+import { AIPredictionPage } from '../../pages/AIPredictionPage';
+import { AlertCenterPage } from '../../pages/AlertCenterPage';
+import { InspectionCenterPage } from '../../pages/InspectionCenterPage';
+import { MaintenanceCenterPage } from '../../pages/MaintenanceCenterPage';
+import { AnalyticsPage } from '../../pages/AnalyticsPage';
+import { AssetManagementPage } from '../../pages/AssetManagementPage';
+import { ReportsPage } from '../../pages/ReportsPage';
+import { SettingsPage } from '../../pages/SettingsPage';
 import { useLiveData } from '../../hooks/useLiveData';
 
 export const AppShell: React.FC = () => {
@@ -23,6 +32,102 @@ export const AppShell: React.FC = () => {
 
   const [activeSection, setActiveSection] = useState<SectionId>('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const renderActivePage = () => {
+    switch (activeSection) {
+      case 'overview':
+        return (
+          <OverviewPage
+            state={state}
+            onSelectConveyor={setSelectedConveyor}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+            onLoadHistory={loadJointHistory}
+          />
+        );
+      case 'live_monitoring':
+        return (
+          <LiveMonitoringPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'digital_twin':
+        return (
+          <DigitalTwinPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'joint_health':
+        return (
+          <JointHealthPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+            onLoadHistory={loadJointHistory}
+          />
+        );
+      case 'ai_prediction':
+        return (
+          <AIPredictionPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'alerts':
+        return (
+          <AlertCenterPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'inspection':
+        return (
+          <InspectionCenterPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'maintenance':
+        return (
+          <MaintenanceCenterPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'analytics':
+        return (
+          <AnalyticsPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'assets':
+        return (
+          <AssetManagementPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'reports':
+        return (
+          <ReportsPage
+            state={state}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+          />
+        );
+      case 'settings':
+        return <SettingsPage state={state} />;
+      default:
+        return (
+          <OverviewPage
+            state={state}
+            onSelectConveyor={setSelectedConveyor}
+            onNavigateToSection={(section) => setActiveSection(section as SectionId)}
+            onLoadHistory={loadJointHistory}
+          />
+        );
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-control-bg text-control-text">
@@ -65,24 +170,7 @@ export const AppShell: React.FC = () => {
         />
 
         <main className="flex-1 flex flex-col overflow-y-auto bg-control-bg">
-          {activeSection === 'overview' ? (
-            <OverviewPage
-              state={state}
-              onSelectConveyor={setSelectedConveyor}
-              onNavigateToSection={(section) => setActiveSection(section as SectionId)}
-              onLoadHistory={loadJointHistory}
-            />
-          ) : activeSection === 'digital_twin' ? (
-            <DigitalTwinPage
-              state={state}
-              onNavigateToSection={(section) => setActiveSection(section as SectionId)}
-            />
-          ) : (
-            <ComingSoonPage
-              sectionId={activeSection}
-              onReturnToOverview={() => setActiveSection('overview')}
-            />
-          )}
+          {renderActivePage()}
         </main>
       </div>
 

@@ -3,12 +3,12 @@ import {
   Camera,
   Activity,
   Gauge,
-  Cpu,
   RotateCcw,
   Play,
   Pause,
   Maximize2,
   Layers,
+  Radio,
 } from 'lucide-react';
 import { ViewPreset, SceneToggles } from './threeScene';
 
@@ -20,6 +20,7 @@ interface DigitalTwinControlsProps {
   beltSpeedMps: number;
   currentLap: number;
   beltPositionM: number;
+  targetJointCode?: string;
   targetJointHealth?: number;
   targetJointState?: string;
   isPaused: boolean;
@@ -36,6 +37,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
   beltSpeedMps,
   currentLap,
   beltPositionM,
+  targetJointCode = 'J02',
   targetJointHealth = 95.0,
   targetJointState = 'HEALTHY',
   isPaused,
@@ -44,11 +46,11 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
   hoveredObjectName,
 }) => {
   const PRESET_OPTIONS: { id: ViewPreset; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: 'overview', label: 'Overview', icon: Maximize2 },
-    { id: 'station', label: 'AI Station', icon: Camera },
-    { id: 'drive', label: 'Drive & Motor', icon: Activity },
-    { id: 'tension', label: 'Tension Cells', icon: Gauge },
-    { id: 'edge', label: 'Edge Nodes', icon: Cpu },
+    { id: 'overview', label: 'CAD Overview', icon: Maximize2 },
+    { id: 'lidar', label: 'TF-Luna LiDAR', icon: Activity },
+    { id: 'rupture', label: 'Rupture Array (3x)', icon: Radio },
+    { id: 'camera', label: 'Multispectral Mast', icon: Camera },
+    { id: 'drive', label: 'Drive & Motor', icon: Gauge },
   ];
 
   const getJointBadge = () => {
@@ -105,9 +107,9 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
             <span className="text-slate-200">{beltPositionM.toFixed(0)} m</span>
           </div>
 
-          {/* Target Joint J04 Status Badge */}
+          {/* Target Joint Status Badge */}
           <div className={`px-2 py-0.5 rounded border text-[11px] font-bold flex items-center gap-1.5 ${getJointBadge()}`}>
-            <span>J04:</span>
+            <span>{targetJointCode}:</span>
             <span>{targetJointHealth.toFixed(1)}%</span>
             <span className="text-[10px]">({targetJointState})</span>
           </div>
@@ -161,7 +163,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                 : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
             }`}
           >
-            Sensors
+            Sensors (4x)
           </button>
 
           <button
@@ -172,7 +174,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                 : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
             }`}
           >
-            Beams / Frustums
+            LiDAR & Frustums
           </button>
 
           <button
@@ -183,7 +185,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                 : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
             }`}
           >
-            Splice Joints (24)
+            Splice Joints (3)
           </button>
 
           <button

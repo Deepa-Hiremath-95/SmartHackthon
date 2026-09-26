@@ -205,7 +205,7 @@ export const ActiveAlertsList: React.FC<ActiveAlertsListProps> = ({
         ) : (
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
             {filteredEvents.map((item) => {
-              const jointCode = item.jointCode || 'J04';
+              const jointCode = item.jointCode || 'J02';
               const isStateChange = item.type === 'STATE_CHANGE';
               const isScenario = item.type === 'SCENARIO_EVENT';
 

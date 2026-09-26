@@ -4,11 +4,10 @@ import {
   Camera,
   Activity,
   Gauge,
-  Waves,
   Cpu,
   Server,
-  AlertTriangle,
   Radio,
+  AlertTriangle,
 } from 'lucide-react';
 import { SensorMetadata } from './sensorData';
 
@@ -33,12 +32,14 @@ export const SensorInspectorDrawer: React.FC<SensorInspectorDrawerProps> = ({
         return <Activity className="w-5 h-5 text-emerald-400" />;
       case 'tension':
         return <Gauge className="w-5 h-5 text-amber-400" />;
-      case 'ultrasonic':
-        return <Waves className="w-5 h-5 text-blue-400" />;
+      case 'proximity':
+        return <Radio className="w-5 h-5 text-blue-400" />;
       case 'daq':
         return <Cpu className="w-5 h-5 text-purple-400" />;
       case 'edge':
         return <Server className="w-5 h-5 text-cyan-400" />;
+      default:
+        return <Activity className="w-5 h-5 text-slate-400" />;
     }
   };
 

@@ -28,24 +28,24 @@ class TestAPIAndWebSocket(unittest.TestCase):
         self.assertIn("Advisory only", data["advisory_only_notice"])
 
     def test_list_conveyors(self):
-        """Verify GET /api/v1/conveyors returns 2 conveyors and 24 joints on CV-01."""
+        """Verify GET /api/v1/conveyors returns 2 conveyors and 3 joints on CV-01."""
         response = self.client.get("/api/v1/conveyors")
         self.assertEqual(response.status_code, 200)
         conveyors = response.json()
         self.assertEqual(len(conveyors), 2)
 
         cv1 = next(c for c in conveyors if c["id"] == "CV-01")
-        self.assertEqual(cv1["joint_count"], 24)
+        self.assertEqual(cv1["joint_count"], 3)
         self.assertEqual(cv1["provenance"], "SIMULATED")
 
     def test_list_joints_on_cv1(self):
-        """Verify GET /api/v1/conveyors/CV-01/joints returns all 24 joints."""
+        """Verify GET /api/v1/conveyors/CV-01/joints returns all 3 joints."""
         response = self.client.get("/api/v1/conveyors/CV-01/joints")
         self.assertEqual(response.status_code, 200)
         joints = response.json()
-        self.assertEqual(len(joints), 24)
+        self.assertEqual(len(joints), 3)
         self.assertEqual(joints[0]["joint_code"], "J01")
-        self.assertEqual(joints[23]["joint_code"], "J24")
+        self.assertEqual(joints[2]["joint_code"], "J03")
 
     def test_sim_controls(self):
         """Verify simulator speed and status REST controls."""
@@ -59,7 +59,7 @@ class TestAPIAndWebSocket(unittest.TestCase):
         self.assertIn("speed_preset", data)
         self.assertIn("paused", data)
         self.assertIn("scenario_phase", data)
-        self.assertEqual(data["target_joint"], "J04")
+        self.assertEqual(data["target_joint"], "J02")
 
         # Change speed preset
         res_speed = self.client.post("/api/v1/sim/speed?preset=60x")
@@ -84,14 +84,14 @@ class TestAPIAndWebSocket(unittest.TestCase):
         res_404 = self.client.get("/api/v1/joints/INVALID_JOINT/history")
         self.assertEqual(res_404.status_code, 404)
 
-        # 2. Existing joint code e.g. "J04" returns 200 list
-        res_j04 = self.client.get("/api/v1/joints/J04/history")
-        self.assertEqual(res_j04.status_code, 200)
-        history = res_j04.json()
+        # 2. Existing joint code e.g. "J02" returns 200 list
+        res_j02 = self.client.get("/api/v1/joints/J02/history")
+        self.assertEqual(res_j02.status_code, 200)
+        history = res_j02.json()
         self.assertIsInstance(history, list)
 
-        # 3. Existing joint ID e.g. "CV01_J04" returns 200 list
-        res_id = self.client.get("/api/v1/joints/CV01_J04/history")
+        # 3. Existing joint ID e.g. "CV01_J02" returns 200 list
+        res_id = self.client.get("/api/v1/joints/CV01_J02/history")
         self.assertEqual(res_id.status_code, 200)
         self.assertIsInstance(res_id.json(), list)
 

@@ -67,7 +67,7 @@ class SimulatorEngine:
         self.max_stored_events = settings.SIM_MAX_STORED_EVENTS
 
         # Scenario and fusion engines
-        self.scenario = SpliceDegradationScenario(target_joint_code="J04", seed=seed)
+        self.scenario = SpliceDegradationScenario(target_joint_code="J02", seed=seed)
         self.fusion_engine = FusionEngine()
 
         # Conveyor physical parameters (defaults matching seed data)

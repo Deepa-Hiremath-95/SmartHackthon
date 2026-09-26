@@ -24,7 +24,7 @@ export const JointGrid: React.FC<JointGridProps> = ({
     if (selectedConveyorId === 'CV-02') {
       displayCodes = ['J25', 'J26', 'J27', 'J28', 'J29', 'J30'];
     } else {
-      displayCodes = Array.from({ length: 24 }, (_, i) => `J${(i + 1).toString().padStart(2, '0')}`);
+      displayCodes = ['J01', 'J02', 'J03'];
     }
   }
 

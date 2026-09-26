@@ -66,7 +66,7 @@ export const DigitalTwinPage: React.FC<DigitalTwinPageProps> = ({ state, onNavig
   useEffect(() => {
     if (!sceneRef.current) return;
 
-    const targetJoint = state.joints['J04'] || state.joints['CV01_J04'];
+    const targetJoint = state.joints['J02'] || state.joints['CV01_J02'];
     const timeAccel = state.simStatus?.time_acceleration ?? 600.0;
     const isPaused = state.simStatus?.paused ?? false;
 
@@ -74,7 +74,7 @@ export const DigitalTwinPage: React.FC<DigitalTwinPageProps> = ({ state, onNavig
       beltSpeedMps: 4.0,
       speedFactor: timeAccel,
       isPaused,
-      targetJointCode: 'J04',
+      targetJointCode: 'J02',
       targetJointState: targetJoint?.state ?? 'HEALTHY',
       targetJointHealth: targetJoint?.health ?? 95.0,
     });
@@ -144,8 +144,9 @@ export const DigitalTwinPage: React.FC<DigitalTwinPageProps> = ({ state, onNavig
         beltSpeedMps={4.0}
         currentLap={state.simStatus?.current_lap ?? 0}
         beltPositionM={state.simStatus?.belt_position_m ?? 0}
-        targetJointHealth={state.joints['J04']?.health ?? 95.0}
-        targetJointState={state.joints['J04']?.state ?? 'HEALTHY'}
+        targetJointCode="J02"
+        targetJointHealth={state.joints['J02']?.health ?? 95.0}
+        targetJointState={state.joints['J02']?.state ?? 'HEALTHY'}
         isPaused={state.simStatus?.paused ?? false}
         onTogglePause={handleTogglePause}
         onResetSim={handleResetSim}
@@ -197,12 +198,14 @@ export const DigitalTwinPage: React.FC<DigitalTwinPageProps> = ({ state, onNavig
         onClose={() => setSelectedSensor(null)}
         onFocusView={() => {
           if (!selectedSensor) return;
-          if (selectedSensor.category === 'vision' || selectedSensor.category === 'laser' || selectedSensor.category === 'ultrasonic') {
-            handleSelectPreset('station');
-          } else if (selectedSensor.category === 'tension') {
-            handleSelectPreset('tension');
-          } else if (selectedSensor.category === 'daq' || selectedSensor.category === 'edge') {
-            handleSelectPreset('edge');
+          if (selectedSensor.category === 'laser' || selectedSensor.category === 'tension') {
+            handleSelectPreset('lidar');
+          } else if (selectedSensor.category === 'vision') {
+            handleSelectPreset('camera');
+          } else if (selectedSensor.category === 'proximity') {
+            handleSelectPreset('rupture');
+          } else {
+            handleSelectPreset('overview');
           }
         }}
       />
