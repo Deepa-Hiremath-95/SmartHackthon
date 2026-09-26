@@ -366,7 +366,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ state }) => {
             </div>
 
             <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded text-[11px] text-amber-300/90 leading-relaxed">
-              <strong>Advisory Architecture:</strong> In compliance with NEXVION project rules, the web dashboard acts purely as an analytical advisory layer. It does not exert remote PLC / SCADA motor start/stop control.
+              <strong>Advisory Architecture:</strong> In compliance with BeltScanX AI project rules, the web dashboard acts purely as an analytical advisory layer. It does not exert remote PLC / SCADA motor start/stop control.
             </div>
           </div>
         </div>

@@ -184,7 +184,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ state: _state }) =
           </div>
 
           <div className="p-3 bg-control-subpanel rounded border border-control-border text-xs text-control-dim leading-relaxed font-sans">
-            By shifting from reactive breakdown repairs to condition-based planned splice refurbishments, NEXVION minimizes unplanned mainline downtime by up to <strong>85%</strong>.
+            By shifting from reactive breakdown repairs to condition-based planned splice refurbishments, BeltScanX AI minimizes unplanned mainline downtime by up to <strong>85%</strong>.
           </div>
         </div>
       </div>

@@ -76,7 +76,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             <Activity className="w-4 h-4 text-emerald-400" />
           </div>
           <div>
-            <div className="font-bold text-sm tracking-wide text-white leading-tight">NEXVION</div>
+            <div className="font-bold text-sm tracking-wide text-white leading-tight">BeltScanX AI</div>
             <div className="text-[10px] text-control-dim font-mono tracking-wider uppercase">Conveyor Health AI</div>
           </div>
         </div>
@@ -104,7 +104,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             className="bg-control-subpanel text-white text-xs rounded border border-control-border px-2.5 py-1.5 focus:outline-none focus:border-slate-500 cursor-pointer font-medium"
           >
             {conveyors.length === 0 ? (
-              <option value="CV-01">CV-01 Overland Mainline (24 Joints)</option>
+              <option value="CV-01">CV-01 Overland Mainline (3 Joints)</option>
             ) : (
               conveyors.map((c) => (
                 <option key={c.id} value={c.id}>

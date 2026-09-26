@@ -270,7 +270,7 @@ export function liveDataReducer(state: LiveDataState, action: LiveDataAction): L
     case 'WS_HEALTH_UPDATE': {
       const msg = action.payload;
       const targetCvId = msg.conveyor_id || 'CV-01';
-      const code = msg.joint_id; // e.g. "J04"
+      const code = msg.joint_id; // e.g. "J02"
 
       const existingCvStore = state.conveyorData[targetCvId] || {
         joints: state.joints,

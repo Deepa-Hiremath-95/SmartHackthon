@@ -39,14 +39,14 @@ async def lifespan(app: FastAPI):
 
     # 3. Start simulation engine
     await simulator.start()
-    logger.info("NEXVION Simulator active and broadcasting at /ws/live")
+    logger.info("BeltScanX AI Simulator active and broadcasting at /ws/live")
 
     yield
 
     # Teardown
     if simulator:
         await simulator.stop()
-    logger.info("NEXVION Backend shut down.")
+    logger.info("BeltScanX AI Backend shut down.")
 
 
 app = FastAPI(
@@ -80,5 +80,5 @@ def root_info():
         "provenance": Provenance.SIMULATED.value,
         "websocket_endpoint": "/ws/live",
         "demo_banner_required": True,
-        "advisory_only_notice": "Advisory only. NEXVION never starts or stops physical machinery.",
+        "advisory_only_notice": "Advisory only. BeltScanX AI never starts or stops physical machinery.",
     }

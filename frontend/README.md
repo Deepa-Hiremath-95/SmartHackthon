@@ -1,6 +1,6 @@
-# NEXVION Frontend (React + TypeScript + Vite + Tailwind)
+# BeltScanX AI Frontend (React + TypeScript + Vite + Tailwind)
 
-This is the web frontend shell and real-time Overview command center for the **NEXVION** Conveyor Belt Joint Health & Predictive Maintenance Platform (SIH 2026, PS ID 26008).
+This is the web frontend shell and real-time Overview command center for the **BeltScanX AI** Conveyor Belt Joint Health & Predictive Maintenance Platform (SIH 2026, PS ID 26008).
 
 ---
 

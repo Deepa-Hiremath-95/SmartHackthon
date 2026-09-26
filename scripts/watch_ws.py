@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/watch_ws.py - Command-line client that prints live health updates from /ws/live.
-Default: target joint (J04) rows, state changes, and one conveyor summary per lap.
+Default: target joint (J02) rows, state changes, and one conveyor summary per lap.
 Flags: --verbose, --target <ID>, --count <N>, --ascii.
 """
 
@@ -43,13 +43,13 @@ def format_state(state_name: str, use_ascii: bool = False) -> str:
 
 async def watch(
     url: str,
-    target: str = "J04",
+    target: str = "J02",
     verbose: bool = False,
     count: int = 0,
     use_ascii: bool = False,
 ):
     print(f"\n=======================================================")
-    print(f" NEXVION Live WebSocket Stream Monitor")
+    print(f" BeltScanX AI Live WebSocket Stream Monitor")
     print(f" Target Endpoint: {url}")
     print(f" Monitored Target: {target} (Mode: {'VERBOSE - All joints' if verbose else 'FILTERED - Target & State Changes'})")
     print(f" Format: {'ASCII' if use_ascii else 'ANSI Color'}")
@@ -183,8 +183,8 @@ def main():
     )
     parser.add_argument(
         "--target",
-        default="J04",
-        help="Target joint to track in default filtered mode (default: J04)",
+        default="J02",
+        help="Target joint to track in default filtered mode (default: J02)",
     )
     parser.add_argument(
         "--verbose",
@@ -213,7 +213,7 @@ def main():
             use_ascii=args.ascii,
         ))
     except KeyboardInterrupt:
-        print("\nDisconnected from NEXVION stream. Goodbye!")
+        print("\nDisconnected from BeltScanX AI stream. Goodbye!")
 
 
 if __name__ == "__main__":

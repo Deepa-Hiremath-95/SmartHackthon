@@ -71,7 +71,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ state }) => {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement('a');
         link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `Nexvion_${selectedReport}_report_${Date.now()}.csv`);
+        link.setAttribute('download', `BeltScanX_${selectedReport}_report_${Date.now()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -252,7 +252,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ state }) => {
           <div className="border-b border-control-border pb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-black text-gray-100 tracking-wider">NEXVION</span>
+                <span className="text-lg font-black text-gray-100 tracking-wider">BeltScanX AI</span>
                 <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded border border-blue-500/30 font-semibold">
                   INTELLIGENCE CERTIFIED
                 </span>
@@ -435,7 +435,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ state }) => {
               <div>Digital Signature Token: <span className="font-mono text-blue-400">SHA256: 8f9b...a12c</span></div>
             </div>
             <div className="space-y-1 sm:text-right">
-              <div className="font-semibold text-gray-300">Nexvion Advisory Notice</div>
+              <div className="font-semibold text-gray-300">BeltScanX AI Advisory Notice</div>
               <div>System output is advisory-only. No remote physical control or stop actions are taken.</div>
               <div className="text-gray-500">Compliance Standard: ISO 55000 / AS 4024.3610</div>
             </div>

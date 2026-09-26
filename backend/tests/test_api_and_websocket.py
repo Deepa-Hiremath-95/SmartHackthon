@@ -24,7 +24,7 @@ class TestAPIAndWebSocket(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["provenance"], "SIMULATED")
-        self.assertEqual(data["platform"], "NEXVION")
+        self.assertEqual(data["platform"], "BeltScanX AI")
         self.assertIn("Advisory only", data["advisory_only_notice"])
 
     def test_list_conveyors(self):

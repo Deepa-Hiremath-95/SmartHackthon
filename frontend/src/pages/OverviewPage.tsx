@@ -29,7 +29,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-control-muted space-y-3">
         <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
-        <p className="text-sm font-mono">Initializing NEXVION Telemetry Pipeline...</p>
+        <p className="text-sm font-mono">Initializing BeltScanX AI Telemetry Pipeline...</p>
         <span className="text-xs text-control-dim">Backfilling assets and connecting to /ws/live</span>
       </div>
     );
@@ -86,7 +86,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 >
                   <span>{c.id}</span>
                   <span className="text-[10px] text-control-dim font-normal hidden md:inline">
-                    {c.id === 'CV-01' ? '(24 Joints)' : '(6 Joints)'}
+                    {c.id === 'CV-01' ? '(3 Joints)' : '(6 Joints)'}
                   </span>
                 </button>
               );
