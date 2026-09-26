@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "NEXVION"
+    PROJECT_NAME: str = "BeltScanX AI"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
@@ -32,3 +32,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+if settings.PROJECT_NAME == "NEXVION":
+    settings.PROJECT_NAME = "BeltScanX AI"

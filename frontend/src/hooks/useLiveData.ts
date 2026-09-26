@@ -24,12 +24,12 @@ export function useLiveData() {
     try {
       const [rootInfo, conveyors, joints, alerts, simStatus, passEvents] = await Promise.all([
         api.getRootInfo().catch(() => ({
-          platform: 'NEXVION',
+          platform: 'BeltScanX AI',
           environment: 'production',
           provenance: 'SIMULATED' as const,
           websocket_endpoint: '/ws/live',
           demo_banner_required: true,
-          advisory_only_notice: 'Advisory only. NEXVION never starts or stops physical machinery.',
+          advisory_only_notice: 'Advisory only. BeltScanX AI never starts or stops physical machinery.',
         })),
         api.getConveyors().catch(() => []),
         api.getConveyorJoints(conveyorId).catch(() => []),

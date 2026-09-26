@@ -50,18 +50,18 @@ describe('liveDataReducer tests', () => {
     conveyor_id: 'CV-01',
     time_acceleration: 600,
     belt_position_m: 150.0,
-    target_joint: 'J04',
+    target_joint: 'J02',
     critical_laps_held: 0,
     provenance: 'SIMULATED',
   };
 
   const mockRootInfo: RootInfo = {
-    platform: 'NEXVION',
+    platform: 'BeltScanX AI',
     environment: 'development',
     provenance: 'SIMULATED',
     websocket_endpoint: '/ws/live',
     demo_banner_required: true,
-    advisory_only_notice: 'Advisory only. NEXVION never starts or stops physical machinery.',
+    advisory_only_notice: 'Advisory only. BeltScanX AI never starts or stops physical machinery.',
   };
 
   it('correctly initializes state and calculates Conveyor Risk Index (0.6*avg + 0.4*worst)', () => {
@@ -246,11 +246,11 @@ describe('liveDataReducer tests', () => {
     let state = liveDataReducer(INITIAL_STATE, {
       type: 'SET_JOINT_HISTORY',
       payload: {
-        jointCode: 'J04',
+        jointCode: 'J02',
         history: [
           {
             pass_event_id: 'pe_1',
-            joint_id: 'J04',
+            joint_id: 'J02',
             lap: 1,
             health: 95.0,
             state: 'HEALTHY',
@@ -259,7 +259,7 @@ describe('liveDataReducer tests', () => {
           },
           {
             pass_event_id: 'pe_2',
-            joint_id: 'J04',
+            joint_id: 'J02',
             lap: 2,
             health: 91.0,
             state: 'HEALTHY',
@@ -270,19 +270,19 @@ describe('liveDataReducer tests', () => {
       },
     });
 
-    expect(state.jointHistory['J04']).toHaveLength(2);
-    expect(state.jointHistory['J04'][0].health).toBe(95.0);
-    expect(state.jointHistory['J04'][1].health).toBe(91.0);
+    expect(state.jointHistory['J02']).toHaveLength(2);
+    expect(state.jointHistory['J02'][0].health).toBe(95.0);
+    expect(state.jointHistory['J02'][1].health).toBe(91.0);
 
     // Merge another set of points (with one overlap)
     state = liveDataReducer(state, {
       type: 'SET_JOINT_HISTORY',
       payload: {
-        jointCode: 'J04',
+        jointCode: 'J02',
         history: [
           {
             pass_event_id: 'pe_2',
-            joint_id: 'J04',
+            joint_id: 'J02',
             lap: 2,
             health: 91.0,
             state: 'HEALTHY',
@@ -291,7 +291,7 @@ describe('liveDataReducer tests', () => {
           },
           {
             pass_event_id: 'pe_3',
-            joint_id: 'J04',
+            joint_id: 'J02',
             lap: 3,
             health: 84.0,
             state: 'WATCH',
@@ -302,8 +302,8 @@ describe('liveDataReducer tests', () => {
       },
     });
 
-    expect(state.jointHistory['J04']).toHaveLength(3);
-    expect(state.jointHistory['J04'][2].health).toBe(84.0);
+    expect(state.jointHistory['J02']).toHaveLength(3);
+    expect(state.jointHistory['J02'][2].health).toBe(84.0);
   });
 
   it('records state transitions and scenario events into dashboard-wide activityLog', () => {
@@ -354,7 +354,7 @@ describe('liveDataReducer tests', () => {
         run_id: 'run_test_123',
         event: 'CRITICAL_HOLD_COMPLETED',
         scenario: 'splice_degradation',
-        target_joint: 'J04',
+        target_joint: 'J02',
         critical_laps_held: 3,
         action: 'RESETTING',
         provenance: 'SIMULATED',
@@ -363,6 +363,6 @@ describe('liveDataReducer tests', () => {
 
     expect(state.activityLog[0].type).toBe('SCENARIO_EVENT');
     expect(state.activityLog[0].title).toContain('CRITICAL_HOLD_COMPLETED');
-    expect(state.activityLog[0].jointCode).toBe('J04');
+    expect(state.activityLog[0].jointCode).toBe('J02');
   });
 });

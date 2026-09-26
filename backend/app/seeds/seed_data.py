@@ -18,8 +18,8 @@ def seed_database(db: Session):
     """
     Seeds initial assets:
     - 1 Mine: MINE-01
-    - 2 Conveyors: CV-01 (Overland Mainline, 24 joints) and CV-02 (Transfer Conveyor, 6 joints)
-    - 24 Joints on CV-01 (J01-J24) matching PRD OV-02 24-joint interactive schematic
+    - 2 Conveyors: CV-01 (Overland Mainline, 3 joints) and CV-02 (Transfer Conveyor, 6 joints)
+    - 3 Joints on CV-01 (J01-J03) spaced at 1600m on 4800m loop
     - 6 Joints on CV-02 (J25-J30)
     - Inspection stations and T1/T2 sensor capabilities
     - Commissioning baseline feature thresholds for all joints
@@ -30,7 +30,7 @@ def seed_database(db: Session):
         logger.info("Database already seeded. Skipping.")
         return
 
-    logger.info("Seeding database with 2 conveyors and 24 primary joints...")
+    logger.info("Seeding database with 2 conveyors and 3 primary joints on CV-01...")
 
     # 1. Mine
     mine = Mine(
@@ -187,7 +187,7 @@ def seed_database(db: Session):
         db.add(sensor)
 
     db.commit()
-    logger.info("Database seeding complete: 2 conveyors, 30 joints total (24 on CV-01).")
+    logger.info("Database seeding complete: 2 conveyors, 9 joints total (3 on CV-01, 6 on CV-02).")
 
 
 def init_and_seed():

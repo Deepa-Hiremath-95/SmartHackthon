@@ -2,14 +2,9 @@ import React, { useState } from 'react';
 import {
   Wrench,
   Calendar,
-  CheckCircle,
-  Clock,
   User,
   Plus,
   Download,
-  AlertCircle,
-  FileSpreadsheet,
-  Check,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
 
@@ -30,10 +25,7 @@ interface WorkOrder {
   partsRequired: string[];
 }
 
-export const MaintenanceCenterPage: React.FC<MaintenanceCenterPageProps> = ({
-  state,
-  onNavigateToSection,
-}) => {
+export const MaintenanceCenterPage: React.FC<MaintenanceCenterPageProps> = ({ state: _state }) => {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([
     {
       id: 'WO-2026-0881',
@@ -111,7 +103,7 @@ export const MaintenanceCenterPage: React.FC<MaintenanceCenterPageProps> = ({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `NEXVION_WorkOrders_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `BeltScanX_WorkOrders_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

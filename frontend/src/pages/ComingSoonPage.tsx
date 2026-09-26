@@ -28,7 +28,7 @@ export const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
       </div>
 
       <p className="text-xs text-control-muted leading-relaxed">
-        This module is scaffolded as part of the 12-section NEXVION platform architecture. In this P0 release, the{' '}
+        This module is scaffolded as part of the 12-section BeltScanX AI platform architecture. In this P0 release, the{' '}
         <strong className="text-slate-200">Overview</strong> command center is fully active with live WebSocket telemetry.
       </p>
 

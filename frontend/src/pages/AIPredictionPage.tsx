@@ -5,28 +5,21 @@ import {
   Clock,
   AlertOctagon,
   ShieldAlert,
-  Layers,
-  HelpCircle,
   Calendar,
-  CheckCircle2,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
-import { classifyHealth, classifyState, SeverityBadge } from '../utils/severity';
+import { SeverityBadge } from '../utils/severity';
 
 interface AIPredictionPageProps {
   state: LiveDataState;
   onNavigateToSection?: (section: string) => void;
 }
 
-export const AIPredictionPage: React.FC<AIPredictionPageProps> = ({
-  state,
-  onNavigateToSection,
-}) => {
+export const AIPredictionPage: React.FC<AIPredictionPageProps> = ({ state }) => {
   const [selectedHorizon, setSelectedHorizon] = useState<'7d' | '14d' | '30d'>('7d');
 
   const targetJoint = state.joints['J02'] || state.joints['CV01_J02'];
   const targetHealth = targetJoint?.health ?? 95.0;
-  const targetState = targetJoint?.state ?? 'HEALTHY';
   const rul = targetJoint?.rul || {
     status: 'DEMO',
     low_days: targetHealth < 60 ? 4 : targetHealth < 80 ? 12 : 35,

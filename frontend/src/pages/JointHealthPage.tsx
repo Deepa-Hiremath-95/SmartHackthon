@@ -2,18 +2,12 @@ import React, { useState } from 'react';
 import {
   HeartPulse,
   Search,
-  Filter,
-  ArrowUpDown,
   TrendingDown,
-  TrendingUp,
   Minus,
   ChevronRight,
-  ShieldCheck,
-  AlertTriangle,
-  ExternalLink,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
-import { classifyHealth, SeverityBadge, SeverityShape } from '../utils/severity';
+import { classifyHealth, SeverityBadge } from '../utils/severity';
 import { JointDetailDrawer } from '../components/overview/JointDetailDrawer';
 
 interface JointHealthPageProps {

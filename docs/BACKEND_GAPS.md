@@ -1,4 +1,4 @@
-# NEXVION Backend Gaps & Frontend Integration Notes
+# BeltScanX AI Backend Gaps & Frontend Integration Notes
 
 This document catalogues gaps identified between the PRD specification (v2.0) and the current backend implementation (`backend/app`). In accordance with project rules, the frontend does not invent fake data or modify backend files; instead, unbacked features are either hidden in standard mode or marked with "API Gap" in Dev mode (`?dev=1`).
 
@@ -20,11 +20,11 @@ This document catalogues gaps identified between the PRD specification (v2.0) an
       "run_id": "run_20260922_010000_abc123",
       "alert_id": "alt_12345678",
       "conveyor_id": "CV-01",
-      "joint_id": "CV01_J04",
+      "joint_id": "CV01_J02",
       "pass_event_id": "pe_88213",
       "severity": "CRITICAL",
       "state": "ACTIVE",
-      "title": "CRITICAL Condition on Joint J04",
+      "title": "CRITICAL Condition on Joint J02",
       "description": "Joint health dropped to 44.2% with risk score 0.56.",
       "evidence": {
         "contributors": { ... },
@@ -55,8 +55,8 @@ This document catalogues gaps identified between the PRD specification (v2.0) an
       "predicted_breaches_count": 1,
       "breaching_joints": [
         {
-          "joint_id": "CV01_J04",
-          "joint_code": "J04",
+          "joint_id": "CV01_J02",
+          "joint_code": "J02",
           "p_breach": 0.58,
           "rul_status": "DEMO",
           "rul_low_days": 7.0,

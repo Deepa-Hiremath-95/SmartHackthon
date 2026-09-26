@@ -34,7 +34,7 @@ export const DemoBanner: React.FC<DemoBannerProps> = ({ provenance, runId, onRun
       <div className="flex items-center gap-3">
         <span className="hidden lg:inline text-[11px] text-purple-200/70 italic flex items-center gap-1">
           <ShieldAlert className="w-3 h-3 text-purple-400" />
-          Advisory only. NEXVION never starts or stops physical machinery.
+          Advisory only. BeltScanX AI never starts or stops physical machinery.
         </span>
         {onRunDemo && (
           <button
