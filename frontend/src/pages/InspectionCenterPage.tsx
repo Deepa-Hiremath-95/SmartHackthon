@@ -3,34 +3,23 @@ import {
   ScanEye,
   Sliders,
   Layers,
-  Camera,
-  Eye,
-  CheckCircle,
-  AlertTriangle,
-  RotateCcw,
-  Sparkles,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
-import { classifyHealth, SeverityBadge } from '../utils/severity';
+import { SeverityBadge } from '../utils/severity';
 
 interface InspectionCenterPageProps {
   state: LiveDataState;
   onNavigateToSection?: (section: string) => void;
 }
 
-export const InspectionCenterPage: React.FC<InspectionCenterPageProps> = ({
-  state,
-  onNavigateToSection,
-}) => {
+export const InspectionCenterPage: React.FC<InspectionCenterPageProps> = ({ state }) => {
   const [selectedJointCode, setSelectedJointCode] = useState('J02');
   const [sliderPosition, setSliderPosition] = useState(50); // 0% to 100%
   const [showBoxes, setShowBoxes] = useState(true);
-  const [selectedModality, setSelectedModality] = useState<'rgb' | 'nir' | 'profile'>('rgb');
 
   const jointCodes = ['J01', 'J02', 'J03'];
   const joint = state.joints[selectedJointCode] || state.joints[`CV01_${selectedJointCode}`];
   const health = joint?.health ?? 95.0;
-  const stateLabel = joint?.state ?? 'HEALTHY';
   const hasDamage = health < 85;
 
   return (

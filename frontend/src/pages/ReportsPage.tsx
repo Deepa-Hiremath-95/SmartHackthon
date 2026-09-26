@@ -64,7 +64,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ state }) => {
           ]),
           [''],
           ['ACTIVE ALERTS', state.alerts.length.toString()],
-          ...state.alerts.map((a: Alert) => [a.id, a.joint_id || 'SYSTEM', a.severity, a.message, a.corroborated ? 'YES' : 'NO']),
+          ...state.alerts.map((a: Alert) => [a.id, a.joint_id || 'SYSTEM', a.severity, a.description || a.title, a.evidence?.is_corroborated ? 'YES' : 'NO']),
         ];
 
         const csvContent = 'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n');
@@ -313,7 +313,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ state }) => {
               <div className="p-3 bg-control-card border border-control-border rounded-lg">
                 <div className="text-[11px] text-gray-400">Corroborated Alerts</div>
                 <div className="text-base font-bold text-gray-100 mt-1 font-mono">
-                  {state.alerts.filter((a: Alert) => a.corroborated).length} Alarms
+                  {state.alerts.filter((a: Alert) => a.evidence?.is_corroborated).length} Alarms
                 </div>
                 <div className="text-[10px] text-amber-400 mt-0.5">ISA-18.2 Dual-Sensor Rule</div>
               </div>

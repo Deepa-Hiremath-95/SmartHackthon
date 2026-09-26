@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import {
   BarChart3,
   DollarSign,
-  TrendingUp,
-  ShieldCheck,
-  Zap,
   Activity,
-  Calendar,
-  Layers,
-  Sparkles,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
 
@@ -17,10 +11,7 @@ interface AnalyticsPageProps {
   onNavigateToSection?: (section: string) => void;
 }
 
-export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
-  state,
-  onNavigateToSection,
-}) => {
+export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ state: _state }) => {
   // ROI Calculator editable parameters
   const [downtimeCostPerHour, setDowntimeCostPerHour] = useState(450000); // ₹4.5 Lakhs / hr
   const [avoidedFailuresYear, setAvoidedFailuresYear] = useState(4);

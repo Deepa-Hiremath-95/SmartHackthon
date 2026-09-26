@@ -2,14 +2,9 @@ import React, { useState } from 'react';
 import {
   Wrench,
   Calendar,
-  CheckCircle,
-  Clock,
   User,
   Plus,
   Download,
-  AlertCircle,
-  FileSpreadsheet,
-  Check,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
 
@@ -30,10 +25,7 @@ interface WorkOrder {
   partsRequired: string[];
 }
 
-export const MaintenanceCenterPage: React.FC<MaintenanceCenterPageProps> = ({
-  state,
-  onNavigateToSection,
-}) => {
+export const MaintenanceCenterPage: React.FC<MaintenanceCenterPageProps> = ({ state: _state }) => {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([
     {
       id: 'WO-2026-0881',

@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import {
   AlertOctagon,
-  AlertTriangle,
   ShieldCheck,
-  CheckCircle,
-  Clock,
-  UserCheck,
   Wrench,
-  Filter,
   Layers,
-  ChevronRight,
   Eye,
   Check,
   History,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
-import { Alert, Severity } from '../types/telemetry';
-import { classifySeverity, classifyState, SeverityBadge, SeverityShape } from '../utils/severity';
+import { Severity } from '../types/telemetry';
+import { classifySeverity, SeverityBadge, SeverityShape } from '../utils/severity';
 
 interface AlertCenterPageProps {
   state: LiveDataState;

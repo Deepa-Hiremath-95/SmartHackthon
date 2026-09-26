@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import {
   Boxes,
   QrCode,
-  Layers,
   Cpu,
-  ShieldCheck,
-  Calendar,
-  ChevronRight,
-  Sparkles,
-  Search,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
 import { SENSOR_REGISTRY } from '../components/digital_twin/sensorData';
@@ -18,10 +12,7 @@ interface AssetManagementPageProps {
   onNavigateToSection?: (section: string) => void;
 }
 
-export const AssetManagementPage: React.FC<AssetManagementPageProps> = ({
-  state,
-  onNavigateToSection,
-}) => {
+export const AssetManagementPage: React.FC<AssetManagementPageProps> = ({ state, onNavigateToSection }) => {
   const [selectedJointPassport, setSelectedJointPassport] = useState('J02');
 
   const joint = state.joints[selectedJointPassport] || state.joints[`CV01_${selectedJointPassport}`];

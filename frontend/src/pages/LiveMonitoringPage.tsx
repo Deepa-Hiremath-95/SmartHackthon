@@ -7,24 +7,15 @@ import {
   Activity,
   Play,
   Pause,
-  Maximize2,
-  RefreshCw,
-  Eye,
-  Sliders,
-  Sparkles,
 } from 'lucide-react';
 import { LiveDataState } from '../hooks/liveDataReducer';
-import { classifyHealth, classifyState, SeverityBadge } from '../utils/severity';
 
 interface LiveMonitoringPageProps {
   state: LiveDataState;
   onNavigateToSection?: (section: string) => void;
 }
 
-export const LiveMonitoringPage: React.FC<LiveMonitoringPageProps> = ({
-  state,
-  onNavigateToSection,
-}) => {
+export const LiveMonitoringPage: React.FC<LiveMonitoringPageProps> = ({ state }) => {
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
   const [cameraMode, setCameraMode] = useState<'rgb' | 'nir' | 'thermal'>('rgb');
   const [isLivePaused, setIsLivePaused] = useState(false);
@@ -42,7 +33,6 @@ export const LiveMonitoringPage: React.FC<LiveMonitoringPageProps> = ({
   const targetJoint = state.joints['J02'] || state.joints['CV01_J02'];
   const targetHealth = targetJoint?.health ?? 95.0;
   const targetState = targetJoint?.state ?? 'HEALTHY';
-  const beltSpeed = state.conveyorSummary?.speed_mps ?? 2.45;
   const currentLap = state.simStatus?.current_lap ?? 0;
   const beltPosition = state.simStatus?.belt_position_m ?? 0;
 
