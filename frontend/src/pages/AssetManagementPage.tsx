@@ -65,23 +65,29 @@ export const AssetManagementPage: React.FC<AssetManagementPageProps> = ({ state,
 
                 {/* Spliced Joints */}
                 <div className="pl-3 border-l-2 border-slate-700 space-y-1.5">
-                  <span className="text-[10px] text-control-dim block">SPLICED JOINTS (3 TOTAL)</span>
-                  {['J01', 'J02', 'J03'].map((code) => (
-                    <button
-                      key={code}
-                      onClick={() => setSelectedJointPassport(code)}
-                      className={`w-full flex items-center justify-between p-2 rounded text-xs transition-colors cursor-pointer ${
-                        selectedJointPassport === code
-                          ? 'bg-slate-800 text-white border border-indigo-400/60 font-bold'
-                          : 'bg-control-subpanel text-slate-300 border border-control-border hover:text-white'
-                      }`}
-                    >
-                      <span>Joint {code}</span>
-                      <span className="text-[10px] text-control-dim">
-                        {code === 'J01' ? '0 m (Tail)' : code === 'J02' ? '1,600 m (Mid)' : '3,200 m (Head)'}
-                      </span>
-                    </button>
-                  ))}
+                  <span className="text-[10px] text-control-dim block">
+                    SPLICED JOINTS ({(state.jointOrder.length > 0 ? state.jointOrder : ['J01', 'J02', 'J03', 'J04']).length} TOTAL)
+                  </span>
+                  {(state.jointOrder.length > 0 ? state.jointOrder : ['J01', 'J02', 'J03', 'J04']).map((code) => {
+                    const j = state.joints[code] || state.joints[`CV01_${code}`];
+                    const posText = j?.position_m !== undefined
+                      ? `${j.position_m.toLocaleString()} m`
+                      : code === 'J01' ? '0 m' : code === 'J02' ? '1,200 m' : code === 'J03' ? '2,400 m' : '3,600 m';
+                    return (
+                      <button
+                        key={code}
+                        onClick={() => setSelectedJointPassport(code)}
+                        className={`w-full flex items-center justify-between p-2 rounded text-xs transition-colors cursor-pointer ${
+                          selectedJointPassport === code
+                            ? 'bg-slate-800 text-white border border-indigo-400/60 font-bold'
+                            : 'bg-control-subpanel text-slate-300 border border-control-border hover:text-white'
+                        }`}
+                      >
+                        <span>Joint {code}</span>
+                        <span className="text-[10px] text-control-dim">{posText}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -141,7 +147,15 @@ export const AssetManagementPage: React.FC<AssetManagementPageProps> = ({ state,
             <div className="bg-control-subpanel p-2.5 rounded border border-control-border space-y-0.5">
               <span className="text-[10px] text-control-dim block">Loop Position</span>
               <strong className="text-white">
-                {selectedJointPassport === 'J01' ? '0.0 m' : selectedJointPassport === 'J02' ? '1,600.0 m' : '3,200.0 m'}
+                {joint?.position_m !== undefined
+                  ? `${joint.position_m.toLocaleString()} m`
+                  : selectedJointPassport === 'J01'
+                  ? '0.0 m'
+                  : selectedJointPassport === 'J02'
+                  ? '1,200.0 m'
+                  : selectedJointPassport === 'J03'
+                  ? '2,400.0 m'
+                  : '3,600.0 m'}
               </strong>
             </div>
 

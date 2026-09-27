@@ -14,23 +14,30 @@ from backend.app.models.enums import Modality
 logger = logging.getLogger("nexvion.seeds")
 
 
-def seed_database(db: Session):
+def seed_database(db: Session, force: bool = False):
     """
     Seeds initial assets:
     - 1 Mine: MINE-01
-    - 2 Conveyors: CV-01 (Overland Mainline, 3 joints) and CV-02 (Transfer Conveyor, 6 joints)
-    - 3 Joints on CV-01 (J01-J03) spaced at 1600m on 4800m loop
+    - 2 Conveyors: CV-01 (Overland Mainline, 4 joints) and CV-02 (Transfer Conveyor, 6 joints)
+    - 4 Joints on CV-01 (J01-J04) spaced at 1200m on 4800m loop
     - 6 Joints on CV-02 (J25-J30)
     - Inspection stations and T1/T2 sensor capabilities
     - Commissioning baseline feature thresholds for all joints
     """
+    if force:
+        logger.info("Force reseed requested. Clearing existing asset and telemetry tables...")
+        # Clear tables in dependency order
+        for table in reversed(Base.metadata.sorted_tables):
+            db.execute(table.delete())
+        db.commit()
+
     # Check if already seeded
     existing_conveyor = db.query(Conveyor).filter(Conveyor.id == "CV-01").first()
     if existing_conveyor:
         logger.info("Database already seeded. Skipping.")
         return
 
-    logger.info("Seeding database with 2 conveyors and 3 primary joints on CV-01...")
+    logger.info("Seeding database with 2 conveyors and 4 primary joints on CV-01...")
 
     # 1. Mine
     mine = Mine(
@@ -79,10 +86,10 @@ def seed_database(db: Session):
         },
     }
 
-    # Seed 3 joints on CV-01 (J01, J02, J03 spaced at 1600m on 4800m loop)
-    for i in range(1, 4):
+    # Seed 4 joints on CV-01 (J01, J02, J03, J04 spaced at 1200m on 4800m loop)
+    for i in range(1, 5):
         code = f"J{i:02d}"
-        pos_m = (i - 1) * 1600.0
+        pos_m = (i - 1) * 1200.0
         joint = Joint(
             id=f"CV01_{code}",
             belt_id="BELT-01",
@@ -187,14 +194,21 @@ def seed_database(db: Session):
         db.add(sensor)
 
     db.commit()
-    logger.info("Database seeding complete: 2 conveyors, 9 joints total (3 on CV-01, 6 on CV-02).")
+    logger.info("Database seeding complete: 2 conveyors, 10 joints total (4 on CV-01, 6 on CV-02).")
 
 
-def init_and_seed():
-    """Initializes tables and seeds data if not present."""
+def init_and_seed(force: bool = False):
+    """Initializes tables and seeds data if not present (or resets if force=True)."""
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        seed_database(db)
+        seed_database(db, force=force)
     finally:
         db.close()
+
+
+if __name__ == "__main__":
+    import sys
+    force_flag = "--force" in sys.argv
+    logging.basicConfig(level=logging.INFO)
+    init_and_seed(force=force_flag)

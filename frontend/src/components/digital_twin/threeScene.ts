@@ -807,13 +807,13 @@ export class ConveyorDigitalTwinScene {
   }
 
   // ==========================================
-  // 3 SPLICE JOINT MARKERS (J01, J02, J03)
+  // 4 SPLICE JOINT MARKERS (J01, J02, J03, J04)
   // ==========================================
   private buildJointMarkers(): void {
     const jointWidth = 1.32;
     const jointLength = 0.22;
 
-    const jointCodes = ['J01', 'J02', 'J03'];
+    const jointCodes = ['J01', 'J02', 'J03', 'J04'];
 
     jointCodes.forEach((code, idx) => {
       const jointGroup = new THREE.Group();
@@ -852,8 +852,8 @@ export class ConveyorDigitalTwinScene {
       flag.position.set(0, 0.36, jointWidth / 2 + 0.12);
       jointGroup.add(flag);
 
-      // Initial position spaced evenly at 1/3 offsets [0, 0.333, 0.666]
-      const initialFrac = idx / 3.0;
+      // Initial position spaced evenly at 1/4 offsets [0, 0.25, 0.5, 0.75]
+      const initialFrac = idx / 4.0;
       this.jointPositions.set(code, initialFrac);
 
       const initialX = -5.5 + initialFrac * 11.0;

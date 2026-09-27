@@ -17,7 +17,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export const api = {
   getRootInfo: async (): Promise<RootInfo> => {
-    const res = await fetch('/');
+    const res = await fetch('/api/v1/info');
     return handleResponse<RootInfo>(res);
   },
 

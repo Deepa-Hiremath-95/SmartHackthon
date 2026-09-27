@@ -145,17 +145,17 @@ class TestScenarioAndSimulator(unittest.TestCase):
         finally:
             db.close()
 
-        # Simulate pass events for all 3 joints in lap 1
+        # Simulate pass events for all 4 joints in lap 1
         crossed_joints = sim.joints[:]
-        self.assertEqual(len(crossed_joints), 3)
+        self.assertEqual(len(crossed_joints), 4)
 
         asyncio.run(sim._process_crossed_joints(crossed_joints))
 
         summaries = [m for m in broadcasted_messages if m.get("type") == "conveyor_summary"]
         health_updates = [m for m in broadcasted_messages if m.get("type") == "health_update"]
 
-        # Exactly 3 health updates and exactly 1 conveyor summary
-        self.assertEqual(len(health_updates), 3)
+        # Exactly 4 health updates and exactly 1 conveyor summary
+        self.assertEqual(len(health_updates), 4)
         self.assertEqual(len(summaries), 1)
         self.assertEqual(summaries[0]["lap_no"], sim.current_lap)
         self.assertIn("conveyor_risk_index", summaries[0])

@@ -305,7 +305,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ state }) => {
               <div className="p-3 bg-control-card border border-control-border rounded-lg">
                 <div className="text-[11px] text-gray-400">Active Splice Joints</div>
                 <div className="text-base font-bold text-gray-100 mt-1 font-mono">
-                  3 Joints <span className="text-xs font-normal text-gray-400">({criticalJoints.length} crit / {watchJoints.length} watch)</span>
+                  {joints.length || 4} Joints <span className="text-xs font-normal text-gray-400">({criticalJoints.length} crit / {watchJoints.length} watch)</span>
                 </div>
                 <div className="text-[10px] text-blue-400 mt-0.5">100% Tracking Active</div>
               </div>

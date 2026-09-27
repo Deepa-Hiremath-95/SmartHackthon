@@ -26,11 +26,11 @@ export const InteractiveConveyorMap: React.FC<InteractiveConveyorMapProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // If jointOrder is empty, fallback to J01..J03
+  // If jointOrder is empty, fallback to J01..J04
   const displayCodes =
     jointOrder.length > 0
       ? jointOrder
-      : ['J01', 'J02', 'J03'];
+      : ['J01', 'J02', 'J03', 'J04'];
 
   const beltPosition = simStatus?.belt_position_m ?? 0;
   const loopLength = 4800; // meters
@@ -49,7 +49,7 @@ export const InteractiveConveyorMap: React.FC<InteractiveConveyorMapProps> = ({
             Conveyor Loop Schematic & Sensor Topology (OV-02)
           </h2>
           <span className="text-[11px] font-mono text-control-dim bg-control-subpanel px-2 py-0.5 rounded border border-control-border">
-            4,800 m Loop • 3 Spliced Joints • 4 Sensor Systems
+            4,800 m Loop • {displayCodes.length} Spliced Joints • 4 Sensor Systems
           </span>
         </div>
 

@@ -27,25 +27,33 @@ class TestAPIAndWebSocket(unittest.TestCase):
         self.assertEqual(data["platform"], "BeltScanX AI")
         self.assertIn("Advisory only", data["advisory_only_notice"])
 
+    def test_api_v1_info_endpoint(self):
+        """Verify /api/v1/info endpoint returns platform info for Vite proxy."""
+        response = self.client.get("/api/v1/info")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["provenance"], "SIMULATED")
+        self.assertEqual(data["websocket_endpoint"], "/ws/live")
+
     def test_list_conveyors(self):
-        """Verify GET /api/v1/conveyors returns 2 conveyors and 3 joints on CV-01."""
+        """Verify GET /api/v1/conveyors returns 2 conveyors and 4 joints on CV-01."""
         response = self.client.get("/api/v1/conveyors")
         self.assertEqual(response.status_code, 200)
         conveyors = response.json()
         self.assertEqual(len(conveyors), 2)
 
         cv1 = next(c for c in conveyors if c["id"] == "CV-01")
-        self.assertEqual(cv1["joint_count"], 3)
+        self.assertEqual(cv1["joint_count"], 4)
         self.assertEqual(cv1["provenance"], "SIMULATED")
 
     def test_list_joints_on_cv1(self):
-        """Verify GET /api/v1/conveyors/CV-01/joints returns all 3 joints."""
+        """Verify GET /api/v1/conveyors/CV-01/joints returns all 4 joints."""
         response = self.client.get("/api/v1/conveyors/CV-01/joints")
         self.assertEqual(response.status_code, 200)
         joints = response.json()
-        self.assertEqual(len(joints), 3)
+        self.assertEqual(len(joints), 4)
         self.assertEqual(joints[0]["joint_code"], "J01")
-        self.assertEqual(joints[2]["joint_code"], "J03")
+        self.assertEqual(joints[3]["joint_code"], "J04")
 
     def test_sim_controls(self):
         """Verify simulator speed and status REST controls."""

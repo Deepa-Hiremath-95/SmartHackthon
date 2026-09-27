@@ -9,6 +9,7 @@ import { LiveWebSocketMessage } from '../types/telemetry';
 export function useLiveData() {
   const [state, dispatch] = useReducer(liveDataReducer, INITIAL_STATE);
 
+  const isMountedRef = useRef<boolean>(true);
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectDelayRef = useRef<number>(1000); // 1s initial backoff
@@ -92,9 +93,16 @@ export function useLiveData() {
 
   // 4. WebSocket connection management
   const connectWebSocket = useCallback(() => {
+    if (!isMountedRef.current) return;
+
     if (socketRef.current) {
+      const existing = socketRef.current;
+      socketRef.current = null;
+      existing.onclose = null;
+      existing.onerror = null;
+      existing.onmessage = null;
       try {
-        socketRef.current.close();
+        existing.close(1000, 'Replaced');
       } catch {
         // ignore
       }
@@ -110,6 +118,10 @@ export function useLiveData() {
       socketRef.current = ws;
 
       ws.onopen = () => {
+        if (!isMountedRef.current) {
+          try { ws.close(1000, 'Unmounted'); } catch {}
+          return;
+        }
         reconnectDelayRef.current = 1000; // Reset backoff on success
         lastMessageTimestampRef.current = Date.now();
         dispatch({ type: 'SET_CONNECTION_STATE', payload: 'Connected' });
@@ -124,6 +136,7 @@ export function useLiveData() {
       };
 
       ws.onmessage = (event) => {
+        if (!isMountedRef.current) return;
         lastMessageTimestampRef.current = Date.now();
         try {
           const data: LiveWebSocketMessage = JSON.parse(event.data);
@@ -131,7 +144,6 @@ export function useLiveData() {
           switch (data.type) {
             case 'health_update': {
               dispatch({ type: 'WS_HEALTH_UPDATE', payload: data });
-              // If joint is in abnormal condition, refresh alerts to capture new records
               if (data.health < 85) {
                 refetchAlerts();
               }
@@ -139,7 +151,6 @@ export function useLiveData() {
             }
             case 'conveyor_summary': {
               dispatch({ type: 'WS_CONVEYOR_SUMMARY', payload: data });
-              // Sync sim status when lap finishes
               refetchSimStatus();
               break;
             }
@@ -161,11 +172,13 @@ export function useLiveData() {
       };
 
       ws.onerror = (e) => {
+        if (!isMountedRef.current) return;
         console.warn('WebSocket error:', e);
         dispatch({ type: 'SET_CONNECTION_STATE', payload: 'Offline' });
       };
 
       ws.onclose = () => {
+        if (!isMountedRef.current) return;
         dispatch({ type: 'SET_CONNECTION_STATE', payload: 'Offline' });
         if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
 
@@ -175,21 +188,29 @@ export function useLiveData() {
 
         if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = setTimeout(() => {
-          connectWebSocket();
+          if (isMountedRef.current) {
+            connectWebSocket();
+          }
         }, delay);
       };
     } catch (e) {
       console.error('Failed to create WebSocket:', e);
-      dispatch({ type: 'SET_CONNECTION_STATE', payload: 'Offline' });
+      if (isMountedRef.current) {
+        dispatch({ type: 'SET_CONNECTION_STATE', payload: 'Offline' });
+      }
     }
   }, [refetchAlerts, refetchSimStatus]);
 
-  // Initial mount: load REST & connect WS
+  // Load REST data when selected conveyor changes
   useEffect(() => {
     loadInitialData(state.selectedConveyorId);
+  }, [loadInitialData, state.selectedConveyorId]);
+
+  // WebSocket lifecycle & freshness timer on mount
+  useEffect(() => {
+    isMountedRef.current = true;
     connectWebSocket();
 
-    // 1-second interval to calculate freshness seconds and mark degraded/stale
     freshnessTimerRef.current = setInterval(() => {
       const elapsedSec = Math.floor((Date.now() - lastMessageTimestampRef.current) / 1000);
       const isStale = elapsedSec >= 10;
@@ -198,7 +219,6 @@ export function useLiveData() {
         payload: { seconds: elapsedSec, isStale },
       });
 
-      // Update connection state to Degraded if socket is open but idle > 10s
       if (socketRef.current?.readyState === WebSocket.OPEN) {
         if (isStale) {
           dispatch({ type: 'SET_CONNECTION_STATE', payload: 'Degraded' });
@@ -209,12 +229,24 @@ export function useLiveData() {
     }, 1000);
 
     return () => {
-      if (socketRef.current) socketRef.current.close();
+      isMountedRef.current = false;
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
       if (freshnessTimerRef.current) clearInterval(freshnessTimerRef.current);
+      if (socketRef.current) {
+        const s = socketRef.current;
+        socketRef.current = null;
+        s.onclose = null;
+        s.onerror = null;
+        s.onmessage = null;
+        try {
+          s.close(1000, 'Unmounting');
+        } catch {
+          // ignore
+        }
+      }
     };
-  }, [loadInitialData, connectWebSocket, state.selectedConveyorId]);
+  }, [connectWebSocket]);
 
   const setSelectedConveyor = useCallback((id: string) => {
     dispatch({ type: 'SET_SELECTED_CONVEYOR', payload: id });

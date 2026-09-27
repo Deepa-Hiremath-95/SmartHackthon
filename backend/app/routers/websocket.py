@@ -35,9 +35,12 @@ class ConnectionManager:
 
         for connection in list(self.active_connections):
             try:
+                if hasattr(connection, "client_state") and connection.client_state.name != "CONNECTED":
+                    dead_connections.add(connection)
+                    continue
                 await connection.send_text(payload_text)
             except Exception as e:
-                logger.warning(f"Error sending message to client: {e}")
+                logger.debug(f"Error sending message to client: {e}")
                 dead_connections.add(connection)
 
         for dead in dead_connections:

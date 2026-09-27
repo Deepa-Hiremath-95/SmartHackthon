@@ -72,6 +72,7 @@ app.include_router(sim_router)
 
 
 @app.get("/")
+@app.get("/api/v1/info")
 def root_info():
     """Root platform health endpoint."""
     return {
