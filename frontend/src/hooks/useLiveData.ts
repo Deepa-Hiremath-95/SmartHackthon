@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef, useCallback } from 'react';
-import { api } from '../services/api';
+import { api, getWebSocketUrl } from '../services/api';
 import {
   liveDataReducer,
   INITIAL_STATE,
@@ -108,8 +108,7 @@ export function useLiveData() {
       }
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws/live`;
+    const wsUrl = getWebSocketUrl('/ws/live');
 
     dispatch({ type: 'SET_CONNECTION_STATE', payload: 'Offline' });
 
